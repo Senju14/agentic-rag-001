@@ -1,0 +1,15 @@
+# ==========================
+# Questions in DB (should be answered)
+# ==========================
+
+1. What services does Smith & Johnson Law Firm provide?
+2. Who oversees major corporate decisions in a company?
+3. What are some legal tips for small businesses?
+
+# ==========================
+# Questions NOT in DB (should fallback)
+# ==========================
+
+4. Who is the current CEO of Smith & Johnson Law Firm?
+5. What was the first case handled by the law firm?
+6. How many lawyers are currently working at the firm?

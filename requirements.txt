@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+psycopg2-binary
+sqlalchemy
+pinecone-client
+sentence-transformers
+transformers
+torch
+numpy
+scikit-learn
+requests
+python-dotenv
+nltk
+beautifulsoup4
