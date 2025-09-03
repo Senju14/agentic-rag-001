@@ -1,15 +1,9 @@
-project_demo/
+agentic-rag-001/
 │── data/
-│   ├─ ticket_wifi_issue.txt
-│   ├─ ticket_slow_computer.txt
-│   ├─ faq_account.md
-│   ├─ faq_billing.md
-│   ├─ troubleshooting_printer.html
-│   ├─ knowledge_reset_password.md
-│   └─ about_support.html
-│
-│── db/
-│   └── init_postgres.sql
+│   ├─ corporate_law.md
+│   ├─ intellectual_property.md
+│   ├─ law_firm_intro.txt
+│   └─ legal_tips.html
 │
 │── app/
 │   ├── main.py            # FastAPI entry
@@ -25,7 +19,14 @@ project_demo/
 │   ├── mcp.py             # Simulated MCP
 │   └── chat_history.py    # Store history 
 │
+│── app/
+│   ├── clear_all_data.py  # Delete all data on Pinecone and PostgreSQL
+|
 │── .env                   # Config: API keys, DB, Pinecone
 │── requirements.txt       # Python dependencies
 │── README.md              # Setup & run instructions
+│── rag_test_questions.txt # Demo test questions for RAG
+
+
+
 

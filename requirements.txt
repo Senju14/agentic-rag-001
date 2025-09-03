@@ -3,7 +3,7 @@ uvicorn
 pydantic
 psycopg2-binary
 sqlalchemy
-pinecone-client
+pinecone
 sentence-transformers
 transformers
 torch
@@ -13,3 +13,5 @@ requests
 python-dotenv
 nltk
 beautifulsoup4
+hf_xet
+groq

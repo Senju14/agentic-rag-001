@@ -3,33 +3,20 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from embeddings import embed_text, embed_chunks
 from vectordb import upsert_vectors, query_vector
-from postgres import insert_document, insert_chunk, fetch_chunks_by_text
+from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
 from chunking import semantic_chunk
 from postprocess import postprocess
 from chat_history import generate_reply, get_history, clear_history
+from schema import Document, Chunk, ChatRequest, ChatResponse, ChatbotRequest
 
 # -------------------------
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
 
 # -------------------------
-# Request / Response schema
-class ChatRequest(BaseModel):
-    question: str
-    top_k: int = 5
-    min_score: float | None = None
-    allowed_sources: list[str] | None = None
-    allowed_types: list[str] | None = None
+app = FastAPI(title="RAG Demo")
 
-class ChatResponse(BaseModel):
-    answer: str
-    source_chunks: list
-
-class ChatbotRequest(BaseModel):
-    session_id: str
-    user_input: str
-
-# -------------------------
-app = FastAPI(title="RAG Demo with Chatbot + Filters")
+# CREATE TABLES IF NOT EXIST
+create_tables()
 
 # -------------------------
 @app.post("/ingest-folder")
