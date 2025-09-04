@@ -1,54 +1,65 @@
 from typing import List, Dict
-import nltk
 import numpy as np
 from nltk.tokenize import sent_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
-from embeddings import embed_text  
-
-nltk.download("punkt_tab", quiet=True)
+from embeddings import embed_text
 
 def semantic_chunk(
     text: str,
-    chunk_size: int = 200,
-    overlap: int = 30,
-    similarity_threshold: float = 0.75
+    similarity_threshold: float = 0.7
 ) -> List[Dict]:
+    """
+    Semantic chunking: nhóm các câu dựa trên độ tương đồng cosine.
+    Nếu similarity < threshold thì bắt đầu chunk mới.
+    """
     if not text:
         return []
-    
+
+    # Tách thành câu
     sentences = sent_tokenize(text)
+
+    # Sinh embedding cho từng câu
     embeddings = np.array(embed_text(sentences))
 
-    chunks, cur_words = [], []
+    chunks: List[Dict] = []
+    visited = set()
     idx = 0
 
-    for i, sent in enumerate(sentences):
-        words = sent.split()
-        sim = cosine_similarity([embeddings[i]], [embeddings[i - 1]])[0][0] if i > 0 else 1.0
+    for i, sentence in enumerate(sentences):
+        if i in visited:
+            continue
 
-        if (len(cur_words) + len(words) > chunk_size) or (sim < similarity_threshold):
-            chunks.append({"chunk_index": idx, "chunk_text": " ".join(cur_words)})
-            idx += 1
-            cur_words = cur_words[-overlap:] + words
-        else:
-            cur_words.extend(words)
+        # Bắt đầu chunk mới
+        chunk = [sentence]
+        visited.add(i)
 
-    if cur_words:
-        chunks.append({"chunk_index": idx, "chunk_text": " ".join(cur_words)})
+        for j in range(i + 1, len(sentences)):
+            if j not in visited:
+                sim = cosine_similarity([embeddings[i]], [embeddings[j]])[0][0]
+                if sim > similarity_threshold:
+                    chunk.append(sentences[j])
+                    visited.add(j)
+
+        chunks.append({
+            "chunk_index": idx,
+            "chunk_text": " ".join(chunk)
+        })
+        idx += 1
 
     return chunks
 
 
-# if __name__ == "__main__":
-#     text = (
-#         "Deep learning is a subfield of machine learning. "
-#         "It uses neural networks with many layers. "
-#         "Football is a popular sport played worldwide. "
-#         "Teams try to score goals by kicking a ball into the net. "
-#         "Transformers have changed natural language processing dramatically. "
-#         "They allow models to capture long-range dependencies."
-#     )
+# Test nhanh
+if __name__ == "__main__":
+    text = (
+        "Deep learning is a subfield of machine learning. "
+        "Football is a popular sport played worldwide. "
+        "It uses neural networks with many layers. "
+        "Teams try to score goals by kicking a ball into the net. "
+        "Transformers have changed natural language processing dramatically. "
+        "They allow models to capture long-range dependencies."
+    )
 
-#     chunks = semantic_chunk(text, chunk_size=30, overlap=5, similarity_threshold=0.75)
-#     for c in chunks:
-#         print(c["chunk_index"], "|", c["chunk_text"])
+    chunks = semantic_chunk(text, similarity_threshold=0.7)
+    for c in chunks:
+        print(c["chunk_index"], "|", c["chunk_text"])
