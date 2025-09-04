@@ -33,7 +33,7 @@ def add_message(session_id: str, role: str, content: str):
 def get_history(session_id: str) -> List[Dict[str, str]]:
     return chat_store.get(session_id, [])
 
-def clear_history(session_id: str):
+def clear_history(session_id: str):  
     chat_store.pop(session_id, None)
 
 # -------------------------

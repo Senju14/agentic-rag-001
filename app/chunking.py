@@ -3,6 +3,9 @@ import numpy as np
 from nltk.tokenize import sent_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
 from embeddings import embed_text
+import PyPDF2
+import os
+
 
 def semantic_chunk(
     text: str,
@@ -35,7 +38,7 @@ def semantic_chunk(
 
         for j in range(i + 1, len(sentences)):
             if j not in visited:
-                sim = cosine_similarity([embeddings[i]], [embeddings[j]])[0][0]
+                sim = cosine_similarity([embeddings[i]], [embeddings[j]])    [0][0]
                 if sim > similarity_threshold:
                     chunk.append(sentences[j])
                     visited.add(j)
@@ -49,17 +52,25 @@ def semantic_chunk(
     return chunks
 
 
-# Test nhanh
-if __name__ == "__main__":
-    text = (
-        "Deep learning is a subfield of machine learning. "
-        "Football is a popular sport played worldwide. "
-        "It uses neural networks with many layers. "
-        "Teams try to score goals by kicking a ball into the net. "
-        "Transformers have changed natural language processing dramatically. "
-        "They allow models to capture long-range dependencies."
-    )
+def load_pdf_text(pdf_path: str) -> str:
+    """Đọc toàn bộ text từ file PDF"""
+    text = ""
+    with open(pdf_path, "rb") as f:
+        reader = PyPDF2.PdfReader(f)
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+    return text.strip()
 
-    chunks = semantic_chunk(text, similarity_threshold=0.7)
-    for c in chunks:
-        print(c["chunk_index"], "|", c["chunk_text"])
+
+# # Test nhanh
+# if __name__ == "__main__":
+#     pdf_path = os.path.join(os.path.dirname(__file__), "test.pdf")
+#     if not os.path.exists(pdf_path):
+#         print("Không tìm thấy test.pdf trong folder.")
+#     else:
+#         pdf_text = load_pdf_text(pdf_path)
+#         print(f"PDF length: {len(pdf_text)} chars")
+
+#         chunks = semantic_chunk(pdf_text, similarity_threshold=0.7)
+#         for c in chunks:
+#             print(c["chunk_index"], "|", c["chunk_text"][:200], "...")

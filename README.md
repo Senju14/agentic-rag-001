@@ -1,4 +1,3 @@
-
 # LEARN RAG
 
 A modular Retrieval-Augmented Generation (RAG) pipeline for legal document search and Q&A, leveraging semantic chunking, SBERT embeddings, Pinecone vector DB, PostgreSQL, and FastAPI.
