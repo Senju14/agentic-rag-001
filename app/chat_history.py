@@ -3,6 +3,7 @@ from typing import List, Dict
 from pydantic import BaseModel
 from groq import Groq
 from dotenv import load_dotenv
+from schema import ChatResponse, ChatbotRequest
 
 # -------------------------
 # Load config
@@ -15,16 +16,6 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # -------------------------
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
-
-# -------------------------
-# Data models
-class Message(BaseModel):
-    role: str  # "user" | "assistant" | "system"
-    content: str
-
-class ChatSession(BaseModel):
-    session_id: str
-    messages: List[Message]
 
 # -------------------------
 def add_message(session_id: str, role: str, content: str):
