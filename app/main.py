@@ -34,7 +34,7 @@ def ingest_folder():
             text = f.read()
 
         doc_id = insert_document(fname, fname, "txt")
-        chunks = semantic_chunk(text, chunk_size=200)
+        chunks = semantic_chunk(text)
         chunk_texts = [c["chunk_text"] for c in chunks]
         embeddings = embed_chunks(chunk_texts)
 

@@ -15,3 +15,4 @@ nltk
 beautifulsoup4
 hf_xet
 groq
+PyPDF2
