@@ -39,8 +39,6 @@ Now write the best possible answer following the above rules.
     return prompt
 
 
-
-
 def call_groq(prompt: str):
     if not GROQ_API_KEY:
         return "DEMO ANSWER (no model):\n\n" + (prompt[:1000] + "...")
@@ -57,7 +55,6 @@ def call_groq(prompt: str):
             return f"Model error: {resp.status_code} {resp.text}"
     except Exception as e:
         return f"Model call failed: {e}"
-
 
 
 def answer_question(question: str, top_k: int = 5):

@@ -17,6 +17,11 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
 
+# "session_xyz": [
+#     {"role": "user", "content": "What's the weather today?"},
+# ]
+
+
 # -------------------------
 def add_message(session_id: str, role: str, content: str):
     chat_store.setdefault(session_id, []).append({"role": role, "content": content})
