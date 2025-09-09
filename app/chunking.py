@@ -64,7 +64,7 @@ def load_pdf_text(pdf_path: str) -> str:
 
 # # Test nhanh
 # if __name__ == "__main__":
-#     pdf_path = os.path.join(os.path.dirname(__file__), "test.pdf")
+#     pdf_path = "utils/test.pdf"
 #     if not os.path.exists(pdf_path):
 #         print("Không tìm thấy test.pdf trong folder.")
 #     else:

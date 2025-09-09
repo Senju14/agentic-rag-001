@@ -91,11 +91,19 @@ def search(req: ChatRequest):
     return {"query": req.question, "results": results[:req.top_k]}
 
 # -------------------------
+# @app.post("/chat")
+# def chat(req: ChatbotRequest):
+#     """Chatbot with history (Groq model)"""
+#     reply = generate_reply(req.session_id, req.user_input)
+#     return {"session_id": req.session_id, "reply": reply, "history": get_history(req.session_id)}
+
+
 @app.post("/chat")
 def chat(req: ChatbotRequest):
     """Chatbot with history (Groq model)"""
     reply = generate_reply(req.session_id, req.user_input)
     return {"session_id": req.session_id, "reply": reply, "history": get_history(req.session_id)}
+
 
 @app.delete("/chat/{session_id}")
 def clear_chat(session_id: str):
@@ -106,3 +114,4 @@ def clear_chat(session_id: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    

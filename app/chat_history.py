@@ -20,7 +20,7 @@ chat_store: Dict[str, List[Dict[str, str]]] = {}
 # "session_xyz": [
 #     {"role": "user", "content": "What's the weather today?"},
 # ]
-
+ 
 
 # -------------------------
 def add_message(session_id: str, role: str, content: str):

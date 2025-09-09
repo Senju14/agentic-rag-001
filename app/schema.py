@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-
+ 
 class Document(BaseModel):
     id: Optional[int]
     title: str
