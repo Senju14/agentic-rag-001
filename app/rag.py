@@ -7,32 +7,22 @@ import requests
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 
-def build_prompt(question: str, contexts: List[str], tools: str = "Web Search, Weather API", tool_names: str = "web_search, weather") -> str:
-    system_prompt = f"""
-You are an AI assistant that can answer questions using provided CONTEXTS and by calling external TOOLS.
-
-You have access to the following tools:
-{tools}
-
-When answering, always follow this format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do next
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: [your answer here]
-
-Guidelines:
-- If the answer can be found in CONTEXTS, use it and cite the source.
-- If not, use the appropriate TOOL.
-- If the question is about the weather, use the Weather API.
-- If the question is about current events or general knowledge not in CONTEXTS, use Web Search.
-- If you cannot answer, say: "I could not find an exact answer."
+def build_prompt(question: str, contexts: List[str]) -> str:
+    system_prompt = """
+You are an AI assistant using the provided CONTEXTS to answer questions.
 - Always be clear, concise, and helpful.
+- Cite sources by file name from metadata.
+- If answer is not in CONTEXTS, say: 
+  "I could not find an exact answer"
+- Output must be structured as:
+
+Answer:
+[main answer text]
+
+Sources:
+[list of file names or 'Not found']
 """
+
 
     ctx_text = "\n\n---\n\n".join(contexts)
 
@@ -46,6 +36,27 @@ QUESTION:
 
 Now write the best possible answer following the above rules.
 """
+    return prompt
+
+
+
+def build_function_calling_prompt(question: str, contexts: List[str], tools: str, tool_names: str) -> str:
+    system_prompt = f"""
+You have access to the following tools:
+{tools}
+When answering, always follow this format:
+
+Question: the input question you must answer
+Thought: you should always think about what to do next
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: [your answer here]
+"""
+    ctx_text = "\n\n---\n\n".join(contexts)
+    prompt = f"{system_prompt}\n\nCONTEXTS:\n{ctx_text}\n\nQUESTION:\n{question}\n\nNow write the best possible answer following the above rules."
     return prompt
 
 

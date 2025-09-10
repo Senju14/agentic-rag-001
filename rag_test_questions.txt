@@ -5,6 +5,15 @@
 1. What services does Smith & Johnson Law Firm provide?
 2. Who oversees major corporate decisions in a company?
 3. What are some legal tips for small businesses?
+ 
+# ==========================
+# Function Calling
+# ==========================
+
+1. What is the weather like in Ha Noi?
+2. Who is Messi?
+
+3. What event is happening at Apple today? ( Tavily )
 
 # ==========================
 # Questions NOT in DB (should fallback)

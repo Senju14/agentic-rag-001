@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
  
 class Document(BaseModel):
@@ -29,3 +29,24 @@ class ChatResponse(BaseModel):
 class ChatbotRequest(BaseModel):
     session_id: str
     user_input: str
+
+class ToolDescription(BaseModel):
+    name: str
+    description: str
+    parameters: Dict[str, Any]
+
+class FunctionCallRequest(BaseModel):
+    user_input: str
+    session_id: Optional[str] = None
+
+class ToolCallStep(BaseModel):
+    thought: str
+    action: Optional[str] = None
+    action_input: Optional[Dict[str, Any]] = None
+    observation: Optional[str] = None
+
+class FunctionCallResponse(BaseModel):
+    answer: str
+    tool_trace: List[ToolCallStep]
+    tools: List[ToolDescription]
+    source_chunks: Optional[List[dict]] = None

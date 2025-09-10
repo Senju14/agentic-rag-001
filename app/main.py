@@ -7,7 +7,9 @@ from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_
 from chunking import semantic_chunk
 from postprocess import postprocess
 from chat_history import generate_reply, get_history, clear_history
-from schema import Document, Chunk, ChatRequest, ChatResponse, ChatbotRequest
+from schema import Document, Chunk, ChatRequest, ChatResponse, ChatbotRequest, FunctionCallRequest, FunctionCallResponse, ToolDescription
+from chat_history import reply
+from function_calling.tool_registry import tool_registry, custom_functions
 
 # -------------------------
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
@@ -82,7 +84,7 @@ def search(req: ChatRequest):
             "raw_score": h.get("score")
         })
     for h in keyword_hits:
-        results.append({
+        results.append({ 
             "source": "keyword",
             "text": h["chunk_text"],
             "raw_score": h["rank"]
@@ -91,13 +93,6 @@ def search(req: ChatRequest):
     return {"query": req.question, "results": results[:req.top_k]}
 
 # -------------------------
-# @app.post("/chat")
-# def chat(req: ChatbotRequest):
-#     """Chatbot with history (Groq model)"""
-#     reply = generate_reply(req.session_id, req.user_input)
-#     return {"session_id": req.session_id, "reply": reply, "history": get_history(req.session_id)}
-
-
 @app.post("/chat")
 def chat(req: ChatbotRequest):
     """Chatbot with history (Groq model)"""
@@ -109,6 +104,11 @@ def chat(req: ChatbotRequest):
 def clear_chat(session_id: str):
     clear_history(session_id)
     return {"status": "cleared", "session_id": session_id}
+
+@app.post("/function_calling_chat")
+def function_calling_chat(req: FunctionCallRequest):
+    answer, trace = reply(req.session_id or "default", req.user_input, custom_functions, tool_registry, None)
+    return {"answer": answer, "tool_trace": trace}
 
 # -------------------------
 if __name__ == "__main__":

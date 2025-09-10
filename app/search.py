@@ -62,25 +62,25 @@ def retrieve_and_rerank(question: str, top_k: int = 5, alpha: float = 0.5):
 # -------------------------
 # Test
 
-# if __name__ == "__main__":
-#     query = "learning"
-#     semantic_hits, keyword_hits, results = retrieve_and_rerank(query, top_k=5)
+if __name__ == "__main__":
+    query = "What services does Smith & Johnson Law Firm provide?"
+    semantic_hits, keyword_hits, results = retrieve_and_rerank(query, top_k=5)
 
-#     print(f"\nQuery: {query}\n")
+    print(f"\nQuery: {query}\n")
 
-#     # 1. Semantic search raw
-#     print("=== Semantic Search Results ===")
-#     for h in semantic_hits:
-#         txt = h.get("metadata", {}).get("chunk_text") or h.get("text", "")
-#         print(f"[semantic] {txt[:80]}... (raw={h.get('score')})")
+    # 1. Semantic search raw
+    print("=== Semantic Search Results ===")
+    for h in semantic_hits:
+        txt = h.get("metadata", {}).get("chunk_text") or h.get("text", "")
+        print(f"[semantic] {txt[:80]}... (raw={h.get('score')})")
 
-#     # 2. Full-text search raw
-#     print("\n=== Full-text Search Results ===")
-#     for h in keyword_hits:
-#         print(f"[keyword] {h['chunk_text'][:80]}... (rank={h['rank']})")
+    # 2. Full-text search raw
+    print("\n=== Full-text Search Results ===")
+    for h in keyword_hits:
+        print(f"[keyword] {h['chunk_text'][:80]}... (rank={h['rank']})")
 
-#     # 3. Final hybrid reranked
-#     print("\n=== Final Hybrid Reranked Results ===")
-#     for r in results:
-#         print(f"[{r['source']}] {r['text'][:80]}... "
-#               f"(rerank={r['rerank_score']:.4f}, raw={r.get('raw_score')})")
+    # 3. Final hybrid reranked
+    print("\n=== Final Hybrid Reranked Results ===")
+    for r in results:
+        print(f"[{r['source']}] {r['text'][:80]}... "
+              f"(rerank={r['rerank_score']:.4f}, raw={r.get('raw_score')})")
