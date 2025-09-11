@@ -56,10 +56,9 @@ agentic-rag-001/
 │   ├── vectordb.py        # Pinecone handler
 │   ├── postgres.py        # Postgres handler
 │   ├── search.py          # Full-text Search + Top-k + rerank
-│   ├── rag.py             # RAG pipeline (with Groq GPT-OSS 20B)
 │   ├── postprocess.py     # Cleanup output
 │   ├── mcp.py             # Simulated MCP
-│   └── chat_history.py    # Store history 
+│   └── chat_history.py    # Store history (with Groq GPT-OSS 20B)
 │
 │── utils/
 │   └── clear_all_data.py  # Delete all data on Pinecone and PostgreSQL

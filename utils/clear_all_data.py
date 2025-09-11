@@ -24,9 +24,9 @@ PINECONE_INDEX = os.getenv("PINECONE_INDEX")
 PINECONE_HOST = os.getenv("PINECONE_HOST") 
 
 def clear_pinecone():
-    pc = Pinecone(api_key=PINECONE_API_KEY)
+    pinecone = Pinecone(api_key=PINECONE_API_KEY)
 
-    indexes = pc.list_indexes().names()
+    indexes = pinecone.list_indexes().names()
     if PINECONE_INDEX not in indexes:
         print(f"Pinecone index '{PINECONE_INDEX}' not found.")
         return
@@ -35,7 +35,7 @@ def clear_pinecone():
     if PINECONE_HOST:
         index_args["host"] = PINECONE_HOST
 
-    index = pc.Index(**index_args)
+    index = pinecone.Index(**index_args)
     index.delete(delete_all=True)
     print(f"Pinecone: All vectors deleted from index '{PINECONE_INDEX}'.")
  

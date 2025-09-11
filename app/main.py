@@ -10,6 +10,7 @@ from chat_history import generate_reply, get_history, clear_history
 from schema import Document, Chunk, ChatRequest, ChatResponse, ChatbotRequest, FunctionCallRequest, FunctionCallResponse, ToolDescription
 from chat_history import reply
 from function_calling.tool_registry import tool_registry, custom_functions
+import uuid
 
 # -------------------------
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
@@ -41,17 +42,17 @@ def ingest_folder():
         embeddings = embed_chunks(chunk_texts)
 
         vectors = []
-        for c, emb in zip(chunks, embeddings):
-            chunk_id = insert_chunk(doc_id, c["chunk_text"], c["chunk_index"], {"file_name": fname})
+        for chunk, emb in zip(chunks, embeddings):
+            chunk_id = insert_chunk(doc_id, chunk["chunk_text"], chunk["chunk_index"], {"file_name": fname})
             vectors.append({
                 "id": f"{doc_id}_{chunk_id}",
                 "embedding": emb["embedding"],
                 "metadata": {
                     "document_id": doc_id,
                     "chunk_id": chunk_id,
-                    "chunk_text": c["chunk_text"],
+                    "chunk_text": chunk["chunk_text"],
                     "file_name": fname,
-                    "chunk_index": c["chunk_index"],
+                    "chunk_index": chunk["chunk_index"],
                     "file_type": "txt"
                 }
             })
@@ -67,48 +68,44 @@ def ingest_folder():
 @app.post("/search")
 def search(req: ChatRequest):
     """Simple hybrid search: semantic + full-text"""
-    q_emb = embed_text(req.question)
+    question_emb = embed_text(req.question)
 
     # 1. Semantic search
-    semantic_hits = query_vector(q_emb, top_k=req.top_k * 2)
+    semantic_hits = query_vector(question_emb, top_k=req.top_k * 2)
 
     # 2. Full-text search
     keyword_hits = fetch_chunks_by_text(req.question, limit=req.top_k * 2)
 
     # 3. Merge
     results = []
-    for h in semantic_hits:
+    for hit in semantic_hits:
         results.append({
             "source": "semantic",
-            "text": h.get("metadata", {}).get("chunk_text") or h.get("text"),
-            "raw_score": h.get("score")
+            "text": hit.get("metadata", {}).get("chunk_text") or hit.get("text"),
+            "raw_score": hit.get("score")
         })
-    for h in keyword_hits:
+    for hit in keyword_hits:
         results.append({ 
             "source": "keyword",
-            "text": h["chunk_text"],
-            "raw_score": h["rank"]
+            "text": hit["chunk_text"],
+            "raw_score": hit["rank"]
         })
 
     return {"query": req.question, "results": results[:req.top_k]}
-
+ 
 # -------------------------
 @app.post("/chat")
 def chat(req: ChatbotRequest):
-    """Chatbot with history (Groq model)"""
-    reply = generate_reply(req.session_id, req.user_input)
-    return {"session_id": req.session_id, "reply": reply, "history": get_history(req.session_id)}
+    """Chatbot with history, hỗ trợ cả function calling nếu cần"""
+    session_id = req.session_id or uuid.uuid4().hex
+    answer, trace = reply(session_id, req.user_input, custom_functions, tool_registry, None)
+    return {"session_id": session_id, "reply": answer, "trace": trace, "history": get_history(session_id)}
 
 
 @app.delete("/chat/{session_id}")
 def clear_chat(session_id: str):
     clear_history(session_id)
     return {"status": "cleared", "session_id": session_id}
-
-@app.post("/function_calling_chat")
-def function_calling_chat(req: FunctionCallRequest):
-    answer, trace = reply(req.session_id or "default", req.user_input, custom_functions, tool_registry, None)
-    return {"answer": answer, "tool_trace": trace}
 
 # -------------------------
 if __name__ == "__main__":

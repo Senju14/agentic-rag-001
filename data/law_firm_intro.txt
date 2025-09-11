@@ -1,4 +1,14 @@
-Smith & Johnson Law Firm, established in 1995 in New York City, is a full-service law firm that provides comprehensive legal services to businesses of all sizes. 
-The firm specializes in corporate law, intellectual property law, real estate transactions, employment law, and litigation. 
-Over the past 25+ years, Smith & Johnson has successfully represented clients ranging from small startups to Fortune 500 companies in various industries including technology, healthcare, and finance. 
-The firm's mission is to deliver high-quality, strategic legal advice while maintaining the highest standards of integrity, professionalism, and client service.
+Smith & Johnson Law Firm, established in 1995 in New York City, 
+is a full-service law firm that provides comprehensive 
+legal services to businesses of all sizes. 
+The firm specializes in corporate law, intellectual 
+property law, real estate transactions, employment law, 
+and litigation. 
+Over the past 25+ years, Smith & Johnson has 
+successfully represented clients ranging from small 
+startups to Fortune 500 companies in various industries 
+including technology, healthcare, and finance. 
+The firm's mission is to deliver high-quality, 
+strategic legal advice while maintaining the 
+ighest standards of integrity, professionalism, 
+and client service.

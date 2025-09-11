@@ -60,12 +60,12 @@ def fetch_chunks_by_text(query: str, limit: int = 5):
         rows = cur.fetchall()
     return [
         {
-            "id": r[0],
-            "document_id": r[1],
-            "chunk_text": r[2],
-            "chunk_index": r[3],
-            "metadata": r[4],
-            "rank": r[5],
+            "id": row[0],
+            "document_id": row[1],
+            "chunk_text": row[2],
+            "chunk_index": row[3],
+            "metadata": row[4],
+            "rank": row[5],
         }
-        for r in rows
+        for row in rows
     ]

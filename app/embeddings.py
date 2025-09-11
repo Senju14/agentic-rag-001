@@ -1,22 +1,22 @@
 from sentence_transformers import SentenceTransformer
 
-_sbert = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
+sbert = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
 
 def embed_text(text):
     is_str = isinstance(text, str)
     texts = [text] if is_str else text
-    embs = _sbert.encode(texts)
-    embs = [e.tolist() for e in embs]
-    return embs[0] if is_str else embs
+    embeddings = sbert.encode(texts)
+    embeddings = [embedding.tolist() for embedding in embeddings]
+    return embeddings[0] if is_str else embeddings
 
 def embed_chunks(chunks):
-    embs = _sbert.encode(chunks)
+    embeddings = sbert.encode(chunks)
     results = []
-    for i, (chunk, emb) in enumerate(zip(chunks, embs)):
+    for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         results.append({
             "chunk_text": chunk,
             "chunk_index": i,
-            "embedding": emb.tolist()
+            "embedding": embedding.tolist()
         })
     return results
 

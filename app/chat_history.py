@@ -5,7 +5,7 @@ from groq import Groq
 from dotenv import load_dotenv
 from schema import ChatResponse, ChatbotRequest
 from function_calling.tool_registry import custom_functions, tool_registry
-from rag import retrieve_and_rerank
+from search import retrieve_and_rerank
 import json
 
 # -------------------------
@@ -114,13 +114,13 @@ def reply(session_id: str, user_input: str, tools: list, tool_registry, llm_func
 
 
 # -------------------------
-if __name__ == "__main__":
-    sid = "demo-123"
+# if __name__ == "__main__":
+#     sid = "demo-123"
 
-    print("User: What is deep learning?")
-    print("Bot:", generate_reply(sid, "What is deep learning?"))
+#     print("User: What is deep learning?")
+#     print("Bot:", generate_reply(sid, "What is deep learning?"))
 
-    print("\nUser: Explain it simply like I'm 10 years old.")
-    print("Bot:", generate_reply(sid, "Explain it simply like I'm 10 years old."))
+#     print("\nUser: Explain it simply like I'm 10 years old.")
+#     print("Bot:", generate_reply(sid, "Explain it simply like I'm 10 years old."))
 
-    print("\nHistory:", get_history(sid))
+#     print("\nHistory:", get_history(sid))

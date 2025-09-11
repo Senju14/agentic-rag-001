@@ -16,11 +16,11 @@ def clean_text(text: str, file_type: str = "txt") -> str:
 
 
 def load_file(file_path: str) -> str:
-    ext = os.path.splitext(file_path)[1].lower()
+    text = os.path.splitext(file_path)[1].lower()
     file_type = "txt"
-    if ext == ".html" or ext == ".htm":
+    if text == ".html" or text == ".htm":
         file_type = "html"
-    elif ext == ".md":
+    elif text == ".md":
         file_type = "md"
     with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
         content = f.read()
@@ -33,14 +33,14 @@ def load_all_files(folder_path: str):
     for fname in sorted(os.listdir(folder_path)):
         fpath = os.path.join(folder_path, fname)
         if os.path.isfile(fpath) and fname.lower().endswith(('.txt', '.md', '.html', '.htm')):
-            ext = os.path.splitext(fname)[1].lower()
-            ft = "txt"
-            if ext in ('.html', '.htm'):
-                ft = "html"
-            elif ext == '.md':
-                ft = "md"
+            text = os.path.splitext(fname)[1].lower()
+            ftype = "txt"
+            if text in ('.html', '.htm'):
+                ftype = "html"
+            elif text == '.md':
+                ftype = "md"
             text = load_file(fpath)
-            out.append((fname, text, ft))
+            out.append((fname, text, ftype))
     return out
 
 # if __name__ == "__main__":

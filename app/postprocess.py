@@ -2,12 +2,14 @@ from typing import List, Dict, Optional
 
 def deduplicate(results: List[Dict], key: str = "text") -> List[Dict]:
     seen, unique = set(), []
-    for r in results:
-        txt = (r.get(key) or "").strip().lower()
+    for result in results:
+        txt = (result.get(key) or "").strip().lower()
         if txt not in seen:
             seen.add(txt)
-            unique.append(r)
+            unique.append(result)
     return unique
+
+
 
 def filter_results(
     results: List[Dict],
@@ -17,29 +19,31 @@ def filter_results(
     min_score: Optional[float] = None,
 ) -> List[Dict]:
     out = []
-    for r in results:
-        txt = r.get("text") or r.get("chunk_text") or ""
-        md = r.get("metadata", {})
+    for result in results:
+        txt = result.get("text") or result.get("chunk_text") or ""
+        md = result.get("metadata", {})
 
         # 1. filter theo độ dài
         if len(txt) < min_len:
             continue
 
         # 2. filter theo nguồn (semantic / keyword / …)
-        if allowed_sources and r.get("source") not in allowed_sources:
+        if allowed_sources and result.get("source") not in allowed_sources:
             continue
 
         # 3. filter theo loại file (txt, pdf,…)
-        if allowed_types and md.get("file_type") not in allowed_types:
+        if allowed_types and result.get("file_type") not in allowed_types:
             continue
 
         # 4. filter theo score
-        score = r.get("score") or r.get("raw_score")
+        score = result.get("score") or result.get("raw_score")
         if min_score and score and score < min_score:
             continue
 
-        out.append(r)
+        out.append(result)
     return out
+
+
 
 def postprocess(
     results: List[Dict],
