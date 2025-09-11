@@ -15,5 +15,6 @@ nltk
 beautifulsoup4
 hf_xet
 groq
-PyPDF2
 fastmcp
+pdfplumber
+docx2txt

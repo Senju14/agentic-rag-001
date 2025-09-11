@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional
 
+
 def deduplicate(results: List[Dict], key: str = "text") -> List[Dict]:
     seen, unique = set(), []
     for result in results:

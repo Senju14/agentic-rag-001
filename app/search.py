@@ -3,8 +3,8 @@ from embeddings import embed_chunks, embed_text
 from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
 from sentence_transformers import CrossEncoder
 
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
 def retrieve_and_rerank(question: str, top_k: int = 5, alpha: float = 0.5):
     question_emb = embed_text(question)

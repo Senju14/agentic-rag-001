@@ -13,7 +13,6 @@ import json
 load_dotenv()
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
 groq_client = Groq(api_key=GROQ_API_KEY)
 
 # -------------------------
@@ -34,23 +33,6 @@ def get_history(session_id: str) -> List[Dict[str, str]]:
 
 def clear_history(session_id: str):  
     chat_store.pop(session_id, None)
-
-# -------------------------
-def generate_reply(session_id: str, user_input: str, max_tokens: int = 512) -> str:
-    """Generate chatbot reply using Groq model with history context"""
-    add_message(session_id, "user", user_input)
-
-    response = groq_client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=get_history(session_id),
-        max_tokens=max_tokens,
-        temperature=0.5,
-    )
-    print(response)
-
-    reply = response.choices[0].message.content
-    add_message(session_id, "assistant", reply)
-    return reply
 
 # -------------------------
 def reply(session_id: str, user_input: str, tools: list, tool_registry, llm_func, max_tokens: int = 512):

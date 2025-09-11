@@ -38,7 +38,7 @@ def semantic_chunk(
 
         for j in range(i + 1, len(sentences)):
             if j not in visited:
-                sim = cosine_similarity([embeddings[i]], [embeddings[j]])    [0][0]
+                sim = cosine_similarity([embeddings[i]], [embeddings[j]])[0][0]
                 if sim > similarity_threshold:
                     chunk.append(sentences[j])
                     visited.add(j)
@@ -51,18 +51,16 @@ def semantic_chunk(
 
     return chunks
 
+# # Test nhanh 01
+# def load_pdf_text(pdf_path: str) -> str:
+#     """Đọc toàn bộ text từ file PDF"""
+#     text = ""
+#     with open(pdf_path, "rb") as file:
+#         reader = PyPDF2.PdfReader(file)
+#         for page in reader.pages:
+#             text += page.extract_text() + "\n"
+#     return text.strip()
 
-def load_pdf_text(pdf_path: str) -> str:
-    """Đọc toàn bộ text từ file PDF"""
-    text = ""
-    with open(pdf_path, "rb") as f:
-        reader = PyPDF2.PdfReader(f)
-        for page in reader.pages:
-            text += page.extract_text() + "\n"
-    return text.strip()
-
-
-# # Test nhanh
 # if __name__ == "__main__":
 #     pdf_path = "utils/test.pdf"
 #     if not os.path.exists(pdf_path):
@@ -74,3 +72,23 @@ def load_pdf_text(pdf_path: str) -> str:
 #         chunks = semantic_chunk(pdf_text, similarity_threshold=0.7)
 #         for c in chunks:
 #             print(c["chunk_index"], "|", c["chunk_text"][:200], "...")
+
+# --------------------------------------------------
+# # Test nhanh 02
+# if __name__ == "__main__":
+#     from sentence_transformers import SentenceTransformer
+#     from sklearn.metrics.pairwise import cosine_similarity
+
+#     sbert = SentenceTransformer('all-MiniLM-L6-v2')
+#     sentences = ["I love cats", "I like cats", "The weather is sunny"]
+#     embeddings = sbert.encode(sentences)
+
+#     # Tính độ tương đồng giữa câu 0 và 1
+#     sim_0_1 = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
+#     print("Similarity between 0 and 1:", sim_0_1) # 0.9046357
+
+#     # Tính độ tương đồng giữa câu 0 và 2
+#     sim_0_2 = cosine_similarity([embeddings[0]], [embeddings[2]])[0][0]
+#     print("Similarity between 0 and 2:", sim_0_2) # 0.005693812
+
+#     # If delete [0][0] -> [[0.9046357]] 1x1

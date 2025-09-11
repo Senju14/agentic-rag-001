@@ -1,14 +1,12 @@
 import os
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from embeddings import embed_text, embed_chunks
 from vectordb import upsert_vectors, query_vector
 from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
 from chunking import semantic_chunk
 from postprocess import postprocess
-from chat_history import generate_reply, get_history, clear_history
+from chat_history import get_history, clear_history, reply
 from schema import Document, Chunk, ChatRequest, ChatResponse, ChatbotRequest, FunctionCallRequest, FunctionCallResponse, ToolDescription
-from chat_history import reply
 from function_calling.tool_registry import tool_registry, custom_functions
 import uuid
 
@@ -33,12 +31,12 @@ def ingest_folder():
         path = os.path.join(DATA_FOLDER, fname)
         if not os.path.isfile(path):
             continue
-        with open(path, "r", encoding="utf-8") as f:
-            text = f.read()
+        with open(path, "r", encoding="utf-8") as file:
+            text = file.read()
 
         doc_id = insert_document(fname, fname, "txt")
         chunks = semantic_chunk(text)
-        chunk_texts = [c["chunk_text"] for c in chunks]
+        chunk_texts = [chunk["chunk_text"] for chunk in chunks]
         embeddings = embed_chunks(chunk_texts)
 
         vectors = []
@@ -56,12 +54,9 @@ def ingest_folder():
                     "file_type": "txt"
                 }
             })
-
         if vectors:
             upsert_vectors(vectors)
-
         ingested.append({"file": fname, "doc_id": doc_id, "chunks": len(chunks)})
-
     return {"status": "ok", "ingested": ingested}
 
 # -------------------------
@@ -69,13 +64,10 @@ def ingest_folder():
 def search(req: ChatRequest):
     """Simple hybrid search: semantic + full-text"""
     question_emb = embed_text(req.question)
-
     # 1. Semantic search
     semantic_hits = query_vector(question_emb, top_k=req.top_k * 2)
-
     # 2. Full-text search
     keyword_hits = fetch_chunks_by_text(req.question, limit=req.top_k * 2)
-
     # 3. Merge
     results = []
     for hit in semantic_hits:
@@ -90,14 +82,13 @@ def search(req: ChatRequest):
             "text": hit["chunk_text"],
             "raw_score": hit["rank"]
         })
-
     return {"query": req.question, "results": results[:req.top_k]}
  
 # -------------------------
 @app.post("/chat")
 def chat(req: ChatbotRequest):
     """Chatbot with history, hỗ trợ cả function calling nếu cần"""
-    session_id = req.session_id or uuid.uuid4().hex
+    session_id = uuid.uuid4().hex
     answer, trace = reply(session_id, req.user_input, custom_functions, tool_registry, None)
     return {"session_id": session_id, "reply": answer, "trace": trace, "history": get_history(session_id)}
 
