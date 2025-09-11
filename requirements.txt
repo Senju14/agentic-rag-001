@@ -18,3 +18,4 @@ groq
 fastmcp
 pdfplumber
 docx2txt
+PyPDF2

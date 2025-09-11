@@ -20,7 +20,7 @@ def embed_chunks(chunks):
         })
     return results
 
-# Test nhanh
+# Quick Test
 
 # if __name__ == "__main__":
 #     print("Single:", len(embed_text("hello world")))

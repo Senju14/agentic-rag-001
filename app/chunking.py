@@ -12,16 +12,16 @@ def semantic_chunk(
     similarity_threshold: float = 0.7
 ) -> List[Dict]:
     """
-    Semantic chunking: nhóm các câu dựa trên độ tương đồng cosine.
-    Nếu similarity < threshold thì bắt đầu chunk mới.
+    Semantic chunking: group sentences based on cosine similarity.
+    If similarity < threshold then start new chunk.
     """
     if not text:
         return []
 
-    # Tách thành câu
+    # Split into sentences
     sentences = sent_tokenize(text)
 
-    # Sinh embedding cho từng câu
+    # Generate embedding for each sentence
     embeddings = np.array(embed_text(sentences))
 
     chunks: List[Dict] = []
@@ -32,7 +32,7 @@ def semantic_chunk(
         if i in visited:
             continue
 
-        # Bắt đầu chunk mới
+        # Start new chunk
         chunk = [sentence]
         visited.add(i)
 
@@ -51,9 +51,9 @@ def semantic_chunk(
 
     return chunks
 
-# # Test nhanh 01
+# # Quick Test 01
 # def load_pdf_text(pdf_path: str) -> str:
-#     """Đọc toàn bộ text từ file PDF"""
+#     """Read all text from PDF file"""
 #     text = ""
 #     with open(pdf_path, "rb") as file:
 #         reader = PyPDF2.PdfReader(file)
@@ -64,7 +64,7 @@ def semantic_chunk(
 # if __name__ == "__main__":
 #     pdf_path = "utils/test.pdf"
 #     if not os.path.exists(pdf_path):
-#         print("Không tìm thấy test.pdf trong folder.")
+#         print("Cannot find test.pdf in folder.")
 #     else:
 #         pdf_text = load_pdf_text(pdf_path)
 #         print(f"PDF length: {len(pdf_text)} chars")
@@ -74,7 +74,7 @@ def semantic_chunk(
 #             print(c["chunk_index"], "|", c["chunk_text"][:200], "...")
 
 # --------------------------------------------------
-# # Test nhanh 02
+# # Quick Test 02
 # if __name__ == "__main__":
 #     from sentence_transformers import SentenceTransformer
 #     from sklearn.metrics.pairwise import cosine_similarity
@@ -83,11 +83,11 @@ def semantic_chunk(
 #     sentences = ["I love cats", "I like cats", "The weather is sunny"]
 #     embeddings = sbert.encode(sentences)
 
-#     # Tính độ tương đồng giữa câu 0 và 1
+#     # Calculate similarity between sentence 0 and 1
 #     sim_0_1 = cosine_similarity([embeddings[0]], [embeddings[1]])[0][0]
 #     print("Similarity between 0 and 1:", sim_0_1) # 0.9046357
 
-#     # Tính độ tương đồng giữa câu 0 và 2
+#     # Calculate similarity between sentence 0 and 2
 #     sim_0_2 = cosine_similarity([embeddings[0]], [embeddings[2]])[0][0]
 #     print("Similarity between 0 and 2:", sim_0_2) # 0.005693812
 

@@ -85,11 +85,34 @@ def search(req: ChatRequest):
     return {"query": req.question, "results": results[:req.top_k]}
  
 # -------------------------
+def summarize_answers_llm(answers: list, user_input: str) -> str:
+    """
+    Use LLM to summarize raw answers into a single, natural, and coherent response, making sure to link references (like 'there', 'it', etc.) to the correct entities if the questions are related.
+    """
+    from chat_history import groq_client, GROQ_MODEL
+    prompt = (
+        "You are an AI assistant. Combine the following answers into a single, natural, and coherent response. "
+        "If the questions are related (e.g., using words like 'there', 'it', etc.), make sure to link them to the correct entities and keep the answer smooth and clear.\n"
+        f"Original user input: {user_input}\n"
+        f"Answers to combine: " + " ".join(f"- {a}" for a in answers)
+    )
+    response = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[{"role": "system", "content": prompt}],
+        max_tokens=512,
+        temperature=0.5
+    )
+    return response.choices[0].message.content.strip()
+
+# -------------------------
 @app.post("/chat")
 def chat(req: ChatbotRequest):
     """Chatbot with history, hỗ trợ cả function calling nếu cần"""
     session_id = uuid.uuid4().hex
     answer, trace = reply(session_id, req.user_input, custom_functions, tool_registry, None)
+    # If returning multiple answers (list), summarize them using LLM.
+    if isinstance(answer, list):
+        answer = summarize_answers_llm(answer, req.user_input)
     return {"session_id": session_id, "reply": answer, "trace": trace, "history": get_history(session_id)}
 
 

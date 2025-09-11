@@ -24,19 +24,19 @@ def filter_results(
         txt = result.get("text") or result.get("chunk_text") or ""
         md = result.get("metadata", {})
 
-        # 1. filter theo độ dài
+        # 1. filter by length
         if len(txt) < min_len:
             continue
 
-        # 2. filter theo nguồn (semantic / keyword / …)
+        # 2. filter by source (semantic / keyword / …)
         if allowed_sources and result.get("source") not in allowed_sources:
             continue
 
-        # 3. filter theo loại file (txt, pdf,…)
+        # 3. filter by file type (txt, pdf,…)
         if allowed_types and result.get("file_type") not in allowed_types:
             continue
 
-        # 4. filter theo score
+        # 4. filter by score
         score = result.get("score") or result.get("raw_score")
         if min_score and score and score < min_score:
             continue

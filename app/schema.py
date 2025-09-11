@@ -1,13 +1,12 @@
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 
- 
 class Document(BaseModel):
     id: Optional[int]
     title: str
     file_name: str
     file_type: str
-
+ 
 class Chunk(BaseModel):
     id: Optional[int]
     document_id: int
@@ -19,7 +18,7 @@ class ChatRequest(BaseModel):
     question: str
     top_k: int = 5
     min_score: Optional[float] = None
-    allowed_sources: Optional[List[str]] = None
+    allowed_sources: Optional[List[str]] = None             
     allowed_types: Optional[List[str]] = None
 
 class ChatResponse(BaseModel):

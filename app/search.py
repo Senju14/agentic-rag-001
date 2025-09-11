@@ -51,7 +51,7 @@ def retrieve_and_rerank(question: str, top_k: int = 5, alpha: float = 0.5):
     scores = reranker.predict(pairs)
 
     for candidate, score in zip(candidates, scores):
-        # Kết hợp raw_score + reranker_score
+        # Combine raw_score + reranker_score
         candidate["rerank_score"] = alpha * float(score) + (1 - alpha) * float(candidate["raw_score"])
 
     candidates.sort(key=lambda x: x["rerank_score"], reverse=True)
