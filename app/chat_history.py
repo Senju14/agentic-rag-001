@@ -42,74 +42,64 @@ def check_or_create_session_id(session_id: str = None) -> str:
     return uuid.uuid4().hex
 
 # -------------------------
-def reply(session_id: str, user_input: str, tools: list, tool_registry, max_tokens: int = 512):
+def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
     trace = []
     answers = []
-    questions = user_input if isinstance(user_input, list) else [user_input]
     
-    for idx, question in enumerate(questions):
-        add_message(session_id, "user", question)
-        response = groq_client.chat.completions.create(
-            model=GROQ_MODEL,
-            messages=get_history(session_id),
-            tools=tools,
-            tool_choice='auto',
-            max_tokens=max_tokens,
-            temperature=0.5
-        )
-        msg = response.choices[0].message
-        tool_calls = getattr(msg, 'tool_calls', None)
-        
-        if tool_calls:
-            for call in tool_calls:
-                tool_name = call.function.name
-                arguments = call.function.arguments
-                if isinstance(arguments, str):
-                    try:
-                        arguments = json.loads(arguments)
-                    except Exception:
-                        arguments = {"city": arguments}
-                thought = f"Calling tool: {tool_name} with {arguments}"
-                result = tool_registry[tool_name](**arguments)
-                trace.append({
-                    "thought": thought,
-                    "action": tool_name,
-                    "action_input": arguments,
-                    "observation": result
-                })
+    # 1. Retrieve from database
+    candidates = retrieve_and_rerank(user_input, top_k=1)
+    if candidates and candidates[0]['rerank_score'] > 0.7:
+        answer = candidates[0]['text']
+        trace.append({
+            "thought": "Found answer in database.",
+            "action": "database",
+            "action_input": None,
+            "observation": answer
+        })
+        add_message(session_id, "assistant", answer)
+        answers.append(answer)
 
-                # Explicitly prompt LLM with tool result for a natural answer
-                tool_prompt = (
-                    f"User asked: {question}\n"
-                    f"Tool result: {result}\n"
-                    "Please answer the user's question naturally and conversationally, using the tool result above."
-                )
-
-                followup = groq_client.chat.completions.create(
-                    model=GROQ_MODEL,
-                    messages=[{"role": "system", "content": tool_prompt}],
-                    max_tokens=max_tokens,
-                    temperature=0.5
-                )
-
-                answer = followup.choices[0].message.content.strip()
-                add_message(session_id, "assistant", answer)
-                answers.append(answer)
-                break  # Only return the first tool_call answer if multiple
-        else:
-
-            answer = msg.content
+    # 2. Call LLM to answer
+    add_message(session_id, "user", user_input)
+    response = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=get_history(session_id),
+        tools=tools,
+        tool_choice='auto',
+        max_tokens=max_tokens,
+        temperature=0.2
+    )
+    msg = response.choices[0].message
+    tool_calls = getattr(msg, 'tool_calls', None)
+    if tool_calls:
+        for call in tool_calls:
+            tool_name = call.function.name
+            arguments = call.function.arguments
+            if isinstance(arguments, str):
+                try:
+                    arguments = json.loads(arguments)
+                except Exception:
+                    arguments = {"city": arguments}
+            result = tool_registry[tool_name](**arguments)
             trace.append({
-                "thought": f"LLM answered directly for: {question}",
-                "action": None,
-                "action_input": None,
-                "observation": answer
+                "thought": f"Calling tool: {tool_name} with {arguments}",
+                "action": tool_name,
+                "action_input": arguments,
+                "observation": result
             })
+            answer = result
             add_message(session_id, "assistant", answer)
             answers.append(answer)
-
-    if len(answers) == 1:
-        return answers[0], trace
+    else:
+        answer = msg.content
+        trace.append({
+            "thought": f"LLM answered directly for: {user_input}",
+            "action": None,
+            "action_input": None,
+            "observation": answer
+        })
+        add_message(session_id, "assistant", answer)
+        answers.append(answer)
     return answers, trace
 
 
