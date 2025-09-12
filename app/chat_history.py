@@ -1,13 +1,12 @@
 import os
 from typing import List, Dict
-from pydantic import BaseModel
 from groq import Groq
 from dotenv import load_dotenv
-from schema import ChatResponse, ChatbotRequest
-from function_calling.tool_registry import custom_functions, tool_registry
+from function_calling.tool_registry import tool_registry
 from search import retrieve_and_rerank
 import json
 import re
+import uuid
  
 # -------------------------
 # Load config
@@ -26,8 +25,6 @@ chat_store: Dict[str, List[Dict[str, str]]] = {}
  
 
 # -------------------------
-def add_message(session_id: str, role: str, content: str):
-    chat_store.setdefault(session_id, []).append({"role": role, "content": content})
 
 def get_history(session_id: str) -> List[Dict[str, str]]:
     return chat_store.get(session_id, [])
@@ -35,37 +32,34 @@ def get_history(session_id: str) -> List[Dict[str, str]]:
 def clear_history(session_id: str):  
     chat_store.pop(session_id, None)
 
-def split_questions(text: str) -> list:
-    """
-    Split input into sub-questions based on '?', keep context if any.
-    """
-    # Split by '?' and remove extra spaces
-    parts = [q.strip() for q in re.split(r'[?？]', text) if q.strip()]
-    # Add '?' back to questions (except the last one if not a question)
-    questions = [q + '?' for q in parts[:-1]]
-    # If the last one is not a question, keep it
-    if parts:
-        if text.strip()[-1] not in ['?', '？']:
-            questions.append(parts[-1])
-    return questions
+def add_message(session_id: str, role: str, content: str):
+    chat_store.setdefault(session_id, []).append({"role": role, "content": content})
+
+def check_or_create_session_id(session_id: str = None) -> str:
+    # If not transmitted or transmitted as 'string' (default Swagger), then create new.
+    if session_id and isinstance(session_id, str) and session_id != 'string':
+        return session_id
+    return uuid.uuid4().hex
 
 # -------------------------
-def reply(session_id: str, user_input: str, tools: list, tool_registry, llm_func, max_tokens: int = 512):
+def reply(session_id: str, user_input: str, tools: list, tool_registry, max_tokens: int = 512):
     trace = []
-    questions = split_questions(user_input)
     answers = []
-    for idx, q in enumerate(questions):
-        add_message(session_id, "user", q)
+    questions = user_input if isinstance(user_input, list) else [user_input]
+    
+    for idx, question in enumerate(questions):
+        add_message(session_id, "user", question)
         response = groq_client.chat.completions.create(
             model=GROQ_MODEL,
             messages=get_history(session_id),
-            tools=custom_functions,
+            tools=tools,
             tool_choice='auto',
             max_tokens=max_tokens,
             temperature=0.5
         )
         msg = response.choices[0].message
         tool_calls = getattr(msg, 'tool_calls', None)
+        
         if tool_calls:
             for call in tool_calls:
                 tool_name = call.function.name
@@ -83,32 +77,37 @@ def reply(session_id: str, user_input: str, tools: list, tool_registry, llm_func
                     "action_input": arguments,
                     "observation": result
                 })
+
                 # Explicitly prompt LLM with tool result for a natural answer
                 tool_prompt = (
-                    f"User asked: {q}\n"
+                    f"User asked: {question}\n"
                     f"Tool result: {result}\n"
                     "Please answer the user's question naturally and conversationally, using the tool result above."
                 )
+
                 followup = groq_client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[{"role": "system", "content": tool_prompt}],
                     max_tokens=max_tokens,
                     temperature=0.5
                 )
+
                 answer = followup.choices[0].message.content.strip()
                 add_message(session_id, "assistant", answer)
                 answers.append(answer)
                 break  # Only return the first tool_call answer if multiple
         else:
+
             answer = msg.content
             trace.append({
-                "thought": f"LLM answered directly for: {q}",
+                "thought": f"LLM answered directly for: {question}",
                 "action": None,
                 "action_input": None,
                 "observation": answer
             })
             add_message(session_id, "assistant", answer)
             answers.append(answer)
+
     if len(answers) == 1:
         return answers[0], trace
     return answers, trace

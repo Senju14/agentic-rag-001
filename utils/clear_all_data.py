@@ -25,7 +25,6 @@ PINECONE_HOST = os.getenv("PINECONE_HOST")
 
 def clear_pinecone():
     pinecone = Pinecone(api_key=PINECONE_API_KEY)
-
     indexes = pinecone.list_indexes().names()
     if PINECONE_INDEX not in indexes:
         print(f"Pinecone index '{PINECONE_INDEX}' not found.")

@@ -1,4 +1,4 @@
-from vectordb import upsert_vectors, query_vector
+from pineconedb import upsert_vectors, query_vector
 from embeddings import embed_chunks, embed_text
 from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
 from sentence_transformers import CrossEncoder

@@ -53,7 +53,7 @@ agentic-rag-001/
 │   ├── chunking.py        # Semantic chunking
 │   ├── preprocessing.py   # Clean text
 │   ├── embeddings.py      # SBERT 1024 dim (Qwen/Qwen3-Embedding-0.6B) + Cross-encoder (cross-encoder/ms-marco-MiniLM-L6-v2)
-│   ├── vectordb.py        # Pinecone handler
+│   ├── pineconedb.py        # Pinecone handler
 │   ├── postgres.py        # Postgres handler
 │   ├── search.py          # Full-text Search + Top-k + rerank
 │   ├── postprocess.py     # Cleanup output
