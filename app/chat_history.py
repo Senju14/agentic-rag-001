@@ -7,7 +7,7 @@ from search import retrieve_and_rerank
 import json
 import re
 import uuid
- 
+  
 # -------------------------
 # Load config
 load_dotenv()
@@ -47,7 +47,7 @@ def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
     answers = []
     
     # 1. Retrieve from database
-    candidates = retrieve_and_rerank(user_input, top_k=1)
+    semantic_hits, keyword_hits, candidates = retrieve_and_rerank(user_input, top_k=1)
     if candidates and candidates[0]['rerank_score'] > 0.7:
         answer = candidates[0]['text']
         trace.append({
