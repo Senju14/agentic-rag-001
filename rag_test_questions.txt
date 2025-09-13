@@ -18,7 +18,7 @@
 # Function Calling
 # ==========================
 
-1. What is the weather like in Singapore?                          ( Weather )
+1. What is the weather like in Singapore?                       ( Weather )
 
 2. What event is happening at Apple today?                      ( Tavily )
 

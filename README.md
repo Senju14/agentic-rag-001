@@ -43,29 +43,32 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 ## Project Structure
 
 agentic-rag-001/
-│── data/
-│   ├─ corporate_law.md
-│   ├─ intellectual_property.md
-│   ├─ law_firm_intro.txt
-│   └─ legal_tips.html
 │
-│── app/
-│   ├── main.py            # FastAPI entry
-│   ├── schema.py          # Pydantic models (schema + metadata)
-│   ├── chunking.py        # Semantic chunking
-│   ├── embeddings.py      # SBERT 1024 dim (Qwen/Qwen3-Embedding-0.6B) + Cross-encoder (cross-encoder/ms-marco-MiniLM-L6-v2)
-│   ├── pineconedb.py        # Pinecone handler
-│   ├── postgres.py        # Postgres handler
-│   ├── search.py          # Full-text Search + Top-k + rerank
-│   └── chat_history.py    # Store history (with Groq GPT-OSS 20B)
+├── app/
+│   ├── main.py                 			# FastAPI entrypoint (e.g., starts the API server)
+│   ├── schema.py               			# Pydantic models
+│   ├── chunking.py             			# Text chunking 
+│   ├── embeddings.py           		# Embedding generation (e.g., SBERT, Qwen)
+│   ├── pineconedb.py           		# Pinecone DB
+│   ├── postgres.py             			# PostgreSQL
+│   ├── search.py               			# Search and rerank logic
+│   ├── chat_history.py         			# Chat history management
+│   ├── file_loader.py          			# File loading from data
+│   └── function_calling/
+│       └── tool_registry.py    			# Agent tool registry
 │
-│── utils/
-│   └── clear_all_data.py  # Delete all data on Pinecone and PostgreSQL
+├── data/
+│   ├── architecture_firm.pdf
+│   ├── consulting_firm.docx
+│   └── law_firm_intro.txt
 │
-│── .env                   # Config: API keys, DB, Pinecone
-│── requirements.txt       # Python dependencies
-│── README.md              # Setup & run instructions
-│── rag_test_questions.txt # Demo test questions for RAG
+├── utils/
+│   ├── clear_all_data.py       # clear Pinecone & PostgreSQL
+│   └── test.pdf
+│
+├── rag_test_questions.txt
+├── README.md
+├── requirements.txt
 
 ## Contributing
 
