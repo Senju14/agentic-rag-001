@@ -8,15 +8,16 @@ from chat_history import get_history, clear_history, reply, check_or_create_sess
 from schema import SearchResult, ConversationRequest
 from function_calling.tool_registry import tool_registry, custom_functions
 import uuid
-
-# -------------------------
-DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
+from file_loader import read_file
 
 # -------------------------
 app = FastAPI(title="RAG Demo")
 
 # CREATE TABLES IF NOT EXIST
 create_tables()
+
+# -------------------------
+DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
 
 # -------------------------
 @app.post("/ingest-folder")
@@ -28,10 +29,10 @@ def ingest_folder():
     ingested = []
     for fname in os.listdir(DATA_FOLDER):
         path = os.path.join(DATA_FOLDER, fname)
-        with open(path, "r", encoding="utf-8") as file:
-            text = file.read()
+        
+        text = read_file(path)
 
-        doc_id = insert_document(fname, fname, "txt")
+        doc_id = insert_document(fname, fname, os.path.splitext(fname)[1])          # Get file extension (e.g. .txt, .pdf, .docx)
         chunks = semantic_chunk(text)
         chunk_texts = [chunk["chunk_text"] for chunk in chunks]
         embeddings = embed_chunks(chunk_texts)
@@ -50,7 +51,7 @@ def ingest_folder():
                     "chunk_text": chunk["chunk_text"],
                     "file_name": fname,
                     "chunk_index": chunk["chunk_index"],
-                    "file_type": "txt"
+                    "file_type": os.path.splitext(fname)[1]          # Get file extension (e.g. .txt, .pdf, .docx)
                 }
             })
         if vectors:

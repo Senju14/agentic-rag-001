@@ -45,21 +45,35 @@ def check_or_create_session_id(session_id: str = None) -> str:
 def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
     trace = []
     answers = []
-    
-    # 1. Retrieve from database
+
+    # 1. Try to retrieve from database (RAG)
     semantic_hits, keyword_hits, candidates = retrieve_and_rerank(user_input, top_k=1)
-    if candidates and candidates[0]['rerank_score'] > 0.7:
-        answer = candidates[0]['text']
+    if candidates and candidates[0]['rerank_score'] > 0.8:
+        raw_answer = candidates[0]['text']
         trace.append({
             "thought": "Found answer in database.",
             "action": "database",
             "action_input": None,
-            "observation": answer
+            "observation": raw_answer
         })
+
+        # Rewrite database answer
+        natural_response = groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Rewrite this answer in a natural, user-friendly way."},
+                {"role": "user", "content": f"Answer: {raw_answer}"}
+            ],
+            max_tokens=max_tokens,
+            temperature=0.3
+        )
+        answer = natural_response.choices[0].message.content.strip()
+
         add_message(session_id, "assistant", answer)
         answers.append(answer)
+        return answers, trace  
 
-    # 2. Call LLM to answer
+    # 2. Call LLM to check if a tool is needed
     add_message(session_id, "user", user_input)
     response = groq_client.chat.completions.create(
         model=GROQ_MODEL,
@@ -71,36 +85,68 @@ def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
     )
     msg = response.choices[0].message
     tool_calls = getattr(msg, 'tool_calls', None)
+
     if tool_calls:
         for call in tool_calls:
             tool_name = call.function.name
             arguments = call.function.arguments
+
+            # Convert string args to dict (e.g. user query "weather in Paris" → {"city":"Paris"})
             if isinstance(arguments, str):
                 try:
                     arguments = json.loads(arguments)
                 except Exception:
                     arguments = {"city": arguments}
             result = tool_registry[tool_name](**arguments)
+
             trace.append({
                 "thought": f"Calling tool: {tool_name} with {arguments}",
                 "action": tool_name,
                 "action_input": arguments,
                 "observation": result
             })
-            answer = result
+
+            # Rewrite tool output
+            natural_response = groq_client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant. Rewrite the tool output into a natural, user-friendly answer."},
+                    {"role": "user", "content": f"Tool output: {result}"}
+                ],
+                max_tokens=max_tokens,
+                temperature=0.5
+            )
+            answer = natural_response.choices[0].message.content.strip()
+
             add_message(session_id, "assistant", answer)
             answers.append(answer)
-    else:
-        answer = msg.content
-        trace.append({
-            "thought": f"LLM answered directly for: {user_input}",
-            "action": None,
-            "action_input": None,
-            "observation": answer
-        })
-        add_message(session_id, "assistant", answer)
-        answers.append(answer)
+        return answers, trace
+
+    # 3. Fallback: not in DB and no tool
+    raw_answer = "Sorry, I don’t have this information in my knowledge base."
+    trace.append({
+        "thought": "No data in DB and no tool used.",
+        "action": None,
+        "action_input": None,
+        "observation": raw_answer
+    })
+
+    # Rewrite fallback answer
+    natural_response = groq_client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant. Rewrite this fallback answer politely."},
+            {"role": "user", "content": raw_answer}
+        ],
+        max_tokens=max_tokens,
+        temperature=0.2
+    )
+    answer = natural_response.choices[0].message.content.strip()
+
+    add_message(session_id, "assistant", answer)
+    answers.append(answer)
     return answers, trace
+
 
 
 

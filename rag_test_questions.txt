@@ -2,23 +2,27 @@
 # Questions in DB (should be answered)
 # ==========================
 
-1. What services does Smith & Johnson Law Firm provide?
-2. Who oversees major corporate decisions in a company?
-3. What are some legal tips for small businesses?
+1. When was Smith & Johnson Law Firm established and where is it located?
+2. What industries does Anderson & Lee Consulting Group serve?
+3. What is the vision of Greenfield Architects & Planners?
  
-# ==========================
-# Function Calling
-# ==========================
-
-1. What is the weather like in Ha Noi?
-2. Who is Messi?
-
-3. What event is happening at Apple today? ( Tavily )
-
 # ==========================
 # Questions NOT in DB (should fallback)
 # ==========================
 
-4. Who is the current CEO of Smith & Johnson Law Firm?
-5. What was the first case handled by the law firm?
-6. How many lawyers are currently working at the firm?
+1. Who is Messi?
+2. Who won the FIFA World Cup in 2018?
+3. Does Smith & Johnson Law Firm have offices in Europe?
+
+# ==========================
+# Function Calling
+# ==========================
+
+1. What is the weather like in Singapore?                          ( Weather )
+
+2. What event is happening at Apple today?                      ( Tavily )
+
+3. Send an email to nng.ai.intern01@gmail.com with subject 
+'Meeting Reminder' and body 'Don't forget our meeting at 3pm.'  ( Gmail )
+
+4. Translate this to French: How are you today?                 ( Translate )
