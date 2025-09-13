@@ -7,7 +7,7 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 - Python 3.10+
 - FastAPI
 - Pydantic
-- SBERT (Qwen/Qwen3-Embedding-0.6B)
+- Embedding Model (Qwen/Qwen3-Embedding-0.6B)
 - Cross-encoder (ms-marco-MiniLM-L6-v2)
 - Pinecone
 - PostgreSQL
@@ -23,23 +23,25 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 ## Installation Instructions
 
 1. Clone the repository:
-	```bash
-	git clone https://github.com/Senju14/agentic-rag-001.git
-	cd agentic-rag-001
-	```
+   ```bash
+   git clone https://github.com/Senju14/agentic-rag-001.git
+   cd agentic-rag-001
+   ```
 2. Install dependencies:
-	```bash
-	pip install -r requirements.txt
-	```
+   ```bash
+   python -m venv venv
+   .\venv\Scripts\activate
+   pip install uv
+   uv pip install -r requirements.txt
+   ```
 3. Configure environment variables in `.env` (API keys, DB credentials, Pinecone).
 4. Run the FastAPI app:
-	```bash
-	python app/main.py
-	```
+   ```bash
+   python app/main.py
+   ```
 
 ## Project Structure
 
-```text
 agentic-rag-001/
 │── data/
 │   ├─ corporate_law.md
@@ -51,13 +53,10 @@ agentic-rag-001/
 │   ├── main.py            # FastAPI entry
 │   ├── schema.py          # Pydantic models (schema + metadata)
 │   ├── chunking.py        # Semantic chunking
-│   ├── preprocessing.py   # Clean text
 │   ├── embeddings.py      # SBERT 1024 dim (Qwen/Qwen3-Embedding-0.6B) + Cross-encoder (cross-encoder/ms-marco-MiniLM-L6-v2)
 │   ├── pineconedb.py        # Pinecone handler
 │   ├── postgres.py        # Postgres handler
 │   ├── search.py          # Full-text Search + Top-k + rerank
-│   ├── postprocess.py     # Cleanup output
-│   ├── mcp.py             # Simulated MCP
 │   └── chat_history.py    # Store history (with Groq GPT-OSS 20B)
 │
 │── utils/
@@ -67,7 +66,6 @@ agentic-rag-001/
 │── requirements.txt       # Python dependencies
 │── README.md              # Setup & run instructions
 │── rag_test_questions.txt # Demo test questions for RAG
-```
 
 ## Contributing
 
