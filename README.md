@@ -43,7 +43,7 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 ## Project Structure
 
 ```
-agentic-rag-001/
+	agentic-rag-001/
 │
 ├── app/
 │   ├── main.py                 		# FastAPI entrypoint (e.g., starts the API server)
@@ -64,7 +64,7 @@ agentic-rag-001/
 │   └── law_firm_intro.txt
 │
 ├── utils/
-│   ├── clear_all_data.py       # clear Pinecone & PostgreSQL
+│   ├── clear_all_data.py       		# clear all data from Pinecone & PostgreSQL
 │   └── test.pdf
 │
 ├── rag_test_questions.txt
