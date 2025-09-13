@@ -42,20 +42,21 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 
 ## Project Structure
 
+```
 agentic-rag-001/
 │
 ├── app/
-│   ├── main.py                 			# FastAPI entrypoint (e.g., starts the API server)
-│   ├── schema.py               			# Pydantic models
-│   ├── chunking.py             			# Text chunking 
+│   ├── main.py                 		# FastAPI entrypoint (e.g., starts the API server)
+│   ├── schema.py               		# Pydantic models
+│   ├── chunking.py             		# Text chunking
 │   ├── embeddings.py           		# Embedding generation (e.g., SBERT, Qwen)
 │   ├── pineconedb.py           		# Pinecone DB
-│   ├── postgres.py             			# PostgreSQL
-│   ├── search.py               			# Search and rerank logic
-│   ├── chat_history.py         			# Chat history management
-│   ├── file_loader.py          			# File loading from data
+│   ├── postgres.py             		# PostgreSQL
+│   ├── search.py               		# Search and rerank logic
+│   ├── chat_history.py         		# Chat history management
+│   ├── file_loader.py          		# File loading from data
 │   └── function_calling/
-│       └── tool_registry.py    			# Agent tool registry
+│       └── tool_registry.py    		# Agent tool registry
 │
 ├── data/
 │   ├── architecture_firm.pdf
@@ -69,6 +70,7 @@ agentic-rag-001/
 ├── rag_test_questions.txt
 ├── README.md
 ├── requirements.txt
+```
 
 ## Contributing
 
