@@ -17,3 +17,6 @@ fastmcp
 python-docx
 PyPDF2
 langdetect
+fastmcp
+sympy
+tavily-python

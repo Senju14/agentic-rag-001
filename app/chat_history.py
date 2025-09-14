@@ -48,7 +48,7 @@ def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
 
     # 1. Try to retrieve from database (RAG)
     semantic_hits, keyword_hits, candidates = retrieve_and_rerank(user_input, top_k=1)
-    if candidates and candidates[0]['rerank_score'] > 0.8:
+    if candidates and candidates[0]['final_score'] > 0.8:
         raw_answer = candidates[0]['text']
         trace.append({
             "thought": "Found answer in database.",
