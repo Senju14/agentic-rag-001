@@ -145,12 +145,12 @@ async def chat_mcp(req: ConversationRequest):
     selected_tool = None
     mcp_result = None
 
-    # --- 1. Liệt kê MCP tools ---
+    # --- 1. List MCP tools ---
     public_tools = await list_mcp_tools(public_client)
     private_tools = await list_mcp_tools(private_client)
     mcp_tools_available = [t.name for t in public_tools + private_tools]
 
-    # --- 2. Mapping từ keywords sang tool ---
+    # --- 2. Mapping from keywords to tool ---
     tool_keywords = {
         "solve": "math_solver",
         "password": "password_generator",
@@ -159,17 +159,17 @@ async def chat_mcp(req: ConversationRequest):
         "send mail": "send_mail"
     }
 
-    # --- 3. Chọn tool ---
+    # --- 3. Select tool ---
     for keyword, tool_name in tool_keywords.items():
         if keyword in user_input_lower and tool_name in mcp_tools_available:
             selected_tool = tool_name
             break
 
-    # --- 4. Gọi MCP tool nếu có ---
+    # --- 4. Call MCP tool if available ---
     if selected_tool:
         client_to_use = public_client if selected_tool in [t.name for t in public_tools] else private_client
 
-        # --- Chuẩn bị params ---
+        # --- Prepare params ---
         params = {}
         import re
         if selected_tool == "math_solver":
@@ -188,10 +188,10 @@ async def chat_mcp(req: ConversationRequest):
             if subject_match: params["subject"] = subject_match.group(1)
             if body_match: params["body"] = body_match.group(1)
 
-        # --- Gọi MCP tool ---
+        # --- Call MCP tool ---
         mcp_result = await call_mcp_tool(client_to_use, selected_tool, params)
 
-        # --- Rewrite bằng LLM ---
+        # --- Rewrite by LLM ---
         combined_prompt = (
             f"MCP tool output: {mcp_result}\n"
             f"Rewrite a final answer combining the tool output nicely."
@@ -200,7 +200,7 @@ async def chat_mcp(req: ConversationRequest):
     else:
         final_reply = "No MCP tool matched your request."
 
-    # --- 5. Trả về response ---
+    # --- 5. Return response ---
     return {
         "session_id": session_id,
         "reply": final_reply,
