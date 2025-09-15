@@ -26,7 +26,7 @@ def create_tables():
         metadata JSONB
     );
     
-    -- Tạo GIN index để hỗ trợ full-text search
+    -- Create GIN index to support full-text search
     CREATE INDEX IF NOT EXISTS idx_chunks_tsvector
         ON chunks
         USING gin(to_tsvector('english', chunk_text));
