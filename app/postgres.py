@@ -41,10 +41,6 @@ def insert_chunk(document_id, chunk_text, chunk_index, metadata=None):
     return run("INSERT INTO chunks(document_id,chunk_text,chunk_index,metadata) VALUES(%s,%s,%s,%s) RETURNING id;",
                (document_id,chunk_text,chunk_index,json.dumps(metadata or {})), fetch=True)[0]
 
-def fetch_chunk_by_id(chunk_id):
-    return run("SELECT id,document_id,chunk_text,chunk_index,metadata FROM chunks WHERE id=%s;", (chunk_id,), fetch=True)
-
-
 
 def fetch_chunks_by_text(query: str, limit: int = 5):
     sql = """

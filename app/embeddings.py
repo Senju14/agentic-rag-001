@@ -1,12 +1,13 @@
 from sentence_transformers import SentenceTransformer
 
+# Use this model for 1024 dims
 sbert = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
 
 def embed_text(text):
     embeddings = sbert.encode(text)
     return embeddings.tolist()
 
-# No tolist() the result will be <ndarry>
+# No tolist() the result will be <ndarray>
 # Pinecone work with <list> 
 
 def embed_chunks(chunks):

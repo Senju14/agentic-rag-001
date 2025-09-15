@@ -1,6 +1,6 @@
 import os
 from fastapi import HTTPException
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from docx import Document
 
 def read_file(path: str) -> str:
@@ -10,7 +10,12 @@ def read_file(path: str) -> str:
             return file.read()
     elif file == ".pdf":
         reader = PdfReader(path)
-        return "\n".join([page.extract_text() or "" for page in reader.pages])
+        texts = []
+        for page in reader.pages:
+            raw = page.extract_text() or ""
+            cleaned = raw.replace("\n", " ").replace("  ", " ")
+            texts.append(cleaned)
+        return "\n".join(texts)
     elif file == ".docx":
         doc = Document(path)
         return "\n".join([paragraph.text for paragraph in doc.paragraphs])
@@ -19,11 +24,11 @@ def read_file(path: str) -> str:
 
 # Quick Test
 
-# if __name__ == "__main__":
-#     DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
+if __name__ == "__main__":
+    DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
 
-#     for fname in os.listdir(DATA_FOLDER):
-#         path = os.path.join(DATA_FOLDER, fname)
-#         print(read_file(path)[:100])        
-#         print(os.path.splitext(fname)[1][1:])         # Get file extension (e.g. .txt, .pdf, .docx)
+    for fname in os.listdir(DATA_FOLDER):
+        path = os.path.join(DATA_FOLDER, fname)
+        print(read_file(path)[:100])        
+        print(os.path.splitext(fname)[1])         # Get file extension (e.g. .txt, .pdf, .docx)
 

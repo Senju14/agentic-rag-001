@@ -12,7 +12,7 @@ def weather_tool(city: str, format: str = None):
         response = requests.get(url)
         response.raise_for_status()
         text = response.text.strip()
-        if not text or text.lower() == city.lower() or len(text) < 5:
+        if not text or text.lower() == city.lower():
             return f"Sorry, I could not retrieve the weather for {city}."
         return text
     except Exception as e:

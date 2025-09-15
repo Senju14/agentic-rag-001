@@ -15,7 +15,7 @@ hf_xet
 groq
 fastmcp
 python-docx
-PyPDF2
+pypdf
 langdetect
 fastmcp
 sympy

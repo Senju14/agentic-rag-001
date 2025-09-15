@@ -4,7 +4,6 @@ from fastmcp import FastMCP
 from dotenv import load_dotenv
 from app.search import retrieve_and_rerank
 from app.function_calling.tool_registry import send_mail_tool
-from app.pineconedb import upsert_vectors, query_vector
 
 load_dotenv()
 mcp = FastMCP("MCP Server Private")

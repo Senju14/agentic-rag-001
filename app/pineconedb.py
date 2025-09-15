@@ -27,3 +27,4 @@ def upsert_vectors(vectors):
 def query_vector(vector, top_k=5):
     result = index.query(vector=vector, top_k=top_k, include_metadata=True)
     return [{"id": match.id, "score": match.score, "metadata": match.metadata} for match in result.matches]
+ 

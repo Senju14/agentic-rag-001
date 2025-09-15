@@ -1,89 +1,102 @@
-from pineconedb import upsert_vectors, query_vector
-from embeddings import embed_chunks, embed_text
-from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
 from sentence_transformers import CrossEncoder
+from embeddings import embed_text
+from postgres import fetch_chunks_by_text
+from pineconedb import query_vector
 
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
-def retrieve_and_rerank(question: str, top_k: int = 5, alpha: float = 0.5, k_rrf: int = 60):
+def retrieve_and_rerank(query: str, top_k: int = 5, rrf_k: int = 60):
     """
-    Hybrid search: semantic + full-text + RRF + cross-encoder rerank
+    Hybrid search pipeline:
+    1. Semantic search (Pinecone)
+    2. Full-text search (Postgres)
+    3. Combine with Reciprocal Rank Fusion (RRF)
+    4. Cross-encoder rerank
+    Returns: semantic_hits, keyword_hits, candidates
     """
-    question_emb = embed_text(question)
 
-    # 1. Semantic hits
-    semantic_hits = query_vector(question_emb, top_k=top_k * 2)
+    # Semantic search
+    query_emb = embed_text(query)
+    semantic_hits = query_vector(query_emb, top_k=top_k * 2)    # * 2 because we need to rerank after combining
 
-    # 2. Full-text hits
-    keyword_hits = fetch_chunks_by_text(question, limit=top_k * 2)
+    # Full-text search
+    keyword_hits = fetch_chunks_by_text(query, limit=top_k * 2)
 
-    # 3. Merge candidates and compute RRF score
-    seen_texts = set()
-    candidates = []
-
+    # Combine with RRF
+    candidates = {}
     for rank, hit in enumerate(semantic_hits, start=1):
         text = hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
-        if text not in seen_texts:
-            seen_texts.add(text)
-            rrf_score = 1 / (k_rrf + rank)
-            candidates.append({
-                "id": hit["id"],
+        chunk_id = hit.get("metadata", {}).get("chunk_id") or text
+        if chunk_id not in candidates:
+            candidates[chunk_id] = {
                 "text": text,
-                "metadata": hit.get("metadata"),
-                "source": "semantic",
-                "raw_score": hit.get("score", 0.0),
-                "rrf_score": rrf_score
-            })
+                "semantic_rank": rank,
+                "semantic_score": hit.get("score"),
+                "keyword_rank": None,
+                "keyword_score": None,
+            }
+        else:
+            candidates[chunk_id]["semantic_rank"] = rank
+            candidates[chunk_id]["semantic_score"] = hit.get("score")
 
     for rank, hit in enumerate(keyword_hits, start=1):
-        text = hit["chunk_text"]
-        if text not in seen_texts:
-            seen_texts.add(text)
-            rrf_score = 1 / (k_rrf + rank)
-            candidates.append({
-                "id": f"pg_{hit['id']}",
+        text = hit.get("chunk_text", "")
+        chunk_id = hit.get("id") or text
+        if chunk_id not in candidates:
+            candidates[chunk_id] = {
                 "text": text,
-                "metadata": hit,
-                "source": "keyword",
-                "raw_score": hit["rank"],
-                "rrf_score": rrf_score
-            })
+                "semantic_rank": None,
+                "semantic_score": None,
+                "keyword_rank": rank,
+                "keyword_score": hit.get("rank"),  # use rank as score
+            }
+        else:
+            candidates[chunk_id]["keyword_rank"] = rank
+            candidates[chunk_id]["keyword_score"] = hit.get("rank")
 
-    if not candidates:
-        return semantic_hits, keyword_hits, []
+    # Calculate RRF score
+    for cand in candidates.values():
+        rrf_score = 0.0
+        if cand["semantic_rank"] is not None:
+            rrf_score += 1 / (rrf_k + cand["semantic_rank"])
+        if cand["keyword_rank"] is not None:
+            rrf_score += 1 / (rrf_k + cand["keyword_rank"])
+        cand["rrf_score"] = rrf_score
 
-    # 4. Rerank candidates using cross-encoder
-    pairs = [(question, candidate["text"]) for candidate in candidates]
-    scores = reranker.predict(pairs)
+    combined = sorted(candidates.values(), key=lambda x: x["rrf_score"], reverse=True)
 
-    for candidate, score in zip(candidates, scores):
-        # Combine RRF score + cross-encoder score
-        candidate["final_score"] = alpha * float(score) + (1 - alpha) * float(candidate["rrf_score"])
+    # Cross-encoder rerank
+    texts = [comb["text"] for comb in combined[: 2 * top_k]]
+    if texts:
+        scores = reranker.predict([(query, text) for text in texts])
+        for comb, score in zip(combined[: 2 * top_k], scores):
+            comb["final_score"] = float(score)
 
-    candidates.sort(key=lambda x: x["final_score"], reverse=True)
+        combined = sorted(combined[: 2 * top_k], key=lambda x: x["final_score"], reverse=True)
 
-    return semantic_hits, keyword_hits, candidates[:top_k]
+    candidates = combined[:top_k]
+
+    return semantic_hits, keyword_hits, candidates
 
 
-# -------------------------
-# Test
-if __name__ == "__main__":
-    query = "What services does Smith & Johnson Law Firm provide?"
-    semantic_hits, keyword_hits, candidates = retrieve_and_rerank_rrf(query, top_k=5)
+# ------------------------- Test
+# if __name__ == "__main__":
+#     query = "What services does Smith & Johnson Law Firm provide?"
+#     semantic_hits, keyword_hits, candidates = retrieve_and_rerank(query, top_k=5)
 
-    # 1. Semantic search raw
-    print("=== Semantic Search Results ===")
-    for hit in semantic_hits:
-        txt = hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
-        print(f"[semantic] {txt[:80]}... (raw={hit.get('score')})")
+#     print("=== Semantic Search Results ===")
+#     for i, r in enumerate(semantic_hits, start=1):
+#         text = r.get("metadata", {}).get("chunk_text") or r.get("text", "")
+#         print(f"[semantic] rank={i} | {text[:100]}... (raw_score={r.get('score')})")
 
-    # 2. Full-text search raw
-    print("\n=== Full-text Search Results ===")
-    for hit in keyword_hits:
-        print(f"[keyword] {hit['chunk_text'][:80]}... (rank={hit['rank']})")
+#     print("\n=== Full-Text Search Results ===")
+#     for i, r in enumerate(keyword_hits, start=1):
+#         print(f"[keyword] rank={i} | {r.get('chunk_text')[:100]}... (rank={r.get('rank')})")
 
-    # 3. Final Hybrid RRF + Cross-Encoder
-    print("\n=== Final Hybrid Reranked (RRF + CE) ===")
-    for hit in candidates:
-        print(f"{hit['text'][:80]}... "
-              f"(final_score={hit['final_score']:.4f}, rrf_score={hit['rrf_score']:.4f}, raw={hit.get('raw_score')})")
+#     print("\n=== Hybrid (RRF + Rerank) Candidates ===")
+#     for i, r in enumerate(candidates, start=1):
+#         print(
+#             f"{i}. {r['text'][:120]}..."
+#             f" (sem_score={r.get('semantic_score')}, kw_score={r.get('keyword_score')},"
+#             f" rrf_score={r['rrf_score']:.4f}, final_score={r.get('final_score')})"
+#         )
