@@ -1,26 +1,21 @@
 import os
 import asyncio
 from fastapi import FastAPI, HTTPException
-from embeddings import embed_text, embed_chunks
-from pineconedb import upsert_vectors, query_vector
-from postgres import create_tables, insert_document, insert_chunk, fetch_chunks_by_text
+from embeddings import embed_chunks
+from pineconedb import upsert_vectors
 from chunking import semantic_chunk
 from chat_history import get_history, clear_history, reply, check_or_create_session_id
 from schema import SearchResult, ConversationRequest
 from function_calling.tool_registry import tool_registry, custom_functions
 from search import retrieve_and_rerank
-import uuid
 import uvicorn
 from file_loader import read_file
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from dotenv import load_dotenv
-
-
 load_dotenv()
 
-# -------------------------
-app = FastAPI(title="RAG Demo")
+
 
 # # --- MCP Setup ---
 # MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
@@ -36,67 +31,60 @@ app = FastAPI(title="RAG Demo")
 #     async with client:
 #         return await client.list_tools()
 
-# CREATE TABLES IF NOT EXIST
-create_tables()
 
 # -------------------------
+app = FastAPI(title="RAG Demo")
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
+
 
 # -------------------------
 @app.post("/ingest-folder")
 def ingest_folder():
-    """Load all files, chunk, embed, store in Postgres + Pinecone"""
+    """Load all files, chunk, embed, store in Pinecone"""
     if not os.path.exists(DATA_FOLDER):
         raise HTTPException(status_code=400, detail="Data folder not found")
 
     ingested = []
     for fname in os.listdir(DATA_FOLDER):
         path = os.path.join(DATA_FOLDER, fname)
-        
-        text = read_file(path)
 
-        doc_id = insert_document(fname, fname, os.path.splitext(fname)[1])          # Get file extension (e.g. .txt, .pdf, .docx)
+        text = read_file(path)
         chunks = semantic_chunk(text)
         chunk_texts = [chunk["chunk_text"] for chunk in chunks]
         embeddings = embed_chunks(chunk_texts)
 
         vectors = []
         for chunk, embedding in zip(chunks, embeddings):
-            # Insert chunk into PostgreSQL
-            chunk_id = insert_chunk(doc_id, chunk["chunk_text"], chunk["chunk_index"], {"file_name": fname})
-            # Upload to Pinecone
             vectors.append({
-                "id": f"{doc_id}_{chunk_id}",
+                "id": f"{fname}_{chunk['chunk_index']}", 
                 "embedding": embedding["embedding"],
                 "metadata": {
-                    "document_id": doc_id,
-                    "chunk_id": chunk_id,
                     "chunk_text": chunk["chunk_text"],
-                    "file_name": fname,
                     "chunk_index": chunk["chunk_index"],
-                    "file_type": os.path.splitext(fname)[1]          # Get file extension (e.g. .txt, .pdf, .docx)
+                    "file_name": fname
                 }
             })
-        if vectors: 
-            upsert_vectors(vectors) 
-        ingested.append({"file": fname, "doc_id": doc_id, "chunks": len(chunks)})
+        if vectors:
+            upsert_vectors(vectors)
+        ingested.append({"file": fname, "chunks": len(chunks)})
     return {"status": "Ingestion completed successfully", "ingested": ingested}
+
 
 # -------------------------
 @app.post("/search")
 def search(req: SearchResult):
     """Hybrid search: semantic + full-text + rrf + rerank"""
-    _, _, candidates = retrieve_and_rerank(
+    semantic_hits = retrieve_and_rerank(
         query=req.question,
         top_k=req.top_k
     )
 
     return {
         "query": req.question,
-        "results": candidates
+        "results": semantic_hits
     }
 
-
+ 
 # -------------------------
 @app.post("/chat")
 def chat(req: ConversationRequest):
@@ -116,6 +104,15 @@ def chat(req: ConversationRequest):
         "history": get_history(session_id),
         "tools": [function["function"]["name"] for function in custom_functions],
         "selected_tool": selected_tool
+    }
+
+
+@app.delete("/chat/{session_id}")
+def clear_chat(session_id: str):
+    clear_history(session_id)
+    return {
+        "status": "cleared", 
+        "session_id": session_id
     }
 
 
@@ -200,15 +197,6 @@ def chat(req: ConversationRequest):
 #         "history": get_history(session_id)
 #     }
 
-
-
-@app.delete("/chat/{session_id}")
-def clear_chat(session_id: str):
-    clear_history(session_id)
-    return {
-        "status": "cleared", 
-        "session_id": session_id
-    }
 
 # -------------------------
 if __name__ == "__main__":

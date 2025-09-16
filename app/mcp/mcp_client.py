@@ -3,11 +3,11 @@ import os
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from dotenv import load_dotenv
-
 load_dotenv()
+
+
 PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")
 PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")
-
 
 async def main():
     # Test with public server

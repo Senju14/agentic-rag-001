@@ -1,6 +1,6 @@
 # LEARN RAG
 
-A modular Retrieval-Augmented Generation (RAG) pipeline for legal document search and Q&A, leveraging semantic chunking, SBERT embeddings, Pinecone vector DB, PostgreSQL, and FastAPI.
+A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal document search and Q&A chatbot, leveraging semantic chunking, SBERT embeddings, Pinecone vector DB, and FastAPI.
 
 ## Technologies Used
 
@@ -10,14 +10,12 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 - Embedding Model (Qwen/Qwen3-Embedding-0.6B)
 - Cross-encoder (ms-marco-MiniLM-L6-v2)
 - Pinecone
-- PostgreSQL
 - Groq GPT-OSS 20B
 
 ## Requirements
 
 - Python 3.10 or higher
 - Pinecone account & API key
-- PostgreSQL database
 - All dependencies in `requirements.txt`
 
 ## Installation Instructions
@@ -48,11 +46,10 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 ├── app/
 │   ├── main.py                 		# FastAPI entrypoint (e.g., starts the API server)
 │   ├── schema.py               		# Pydantic models
-│   ├── chunking.py             		# Text chunking
-│   ├── embeddings.py           		# Embedding generation (e.g., SBERT, Qwen)
-│   ├── pineconedb.py           		# Pinecone DB
-│   ├── postgres.py             		# PostgreSQL
-│   ├── search.py               		# Search and rerank logic
+│   ├── chunking.py             		# Semantic chunking
+│   ├── embeddings.py           		# Embedding generation (e.g., Model Qwen)
+│   ├── pineconedb.py           		# Pinecone DB         		
+│   ├── search.py               		# Semantic search and rerank model
 │   ├── chat_history.py         		# Chat history management
 │   ├── file_loader.py          		# File loading from data
 │   └── function_calling/
@@ -64,7 +61,7 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for legal document searc
 │   └── law_firm_intro.txt
 │
 ├── utils/
-│   ├── clear_all_data.py       		# clear all data from Pinecone & PostgreSQL
+│   ├── clear_all_data.py       		# clear all data from Pinecone 
 │   └── test.pdf
 │
 ├── rag_test_questions.txt

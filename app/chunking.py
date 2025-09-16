@@ -3,14 +3,10 @@ import numpy as np
 from nltk.tokenize import sent_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
 from embeddings import embed_text
-import PyPDF2
+from pypdf import PdfReader
 import os
 
-
-def semantic_chunk(
-    text: str,
-    similarity_threshold: float = 0.7
-) -> List[Dict]:
+def semantic_chunk(text: str, similarity_threshold: float = 0.7) -> List[Dict]:
     """
     Semantic chunking: group sentences based on cosine similarity.
     If similarity < threshold then start new chunk.
@@ -18,12 +14,9 @@ def semantic_chunk(
     if not text:
         return []
 
-    # Split into sentences
+    # Split into sentences and generate embedding for each sentence
     sentences = sent_tokenize(text)
-
-    # Generate embedding for each sentence
     embeddings = np.array(embed_text(sentences))
-
     chunks: List[Dict] = []
     visited = set()
     idx = 0
@@ -48,19 +41,21 @@ def semantic_chunk(
             "chunk_text": " ".join(chunk)
         })
         idx += 1
-
     return chunks
 
-# # Quick Test 01
-# def load_pdf_text(pdf_path: str) -> str:
-#     """Read all text from PDF file"""
-#     text = ""
-#     with open(pdf_path, "rb") as file:
-#         reader = PyPDF2.PdfReader(file)
-#         for page in reader.pages:
-#             text += page.extract_text() + "\n"
-#     return text.strip()
 
+
+# Funtion to read PDF file for Quick Test
+def load_pdf_text(pdf_path: str) -> str:
+    """Read all text from PDF file"""
+    text = ""
+    with open(pdf_path, "rb") as file:
+        reader = PdfReader(file)
+        for page in reader.pages:
+            text += page.extract_text() + "\n"
+    return text.strip()
+
+# Quick Test 01
 # if __name__ == "__main__":
 #     pdf_path = "utils/test.pdf"
 #     if not os.path.exists(pdf_path):
@@ -74,7 +69,7 @@ def semantic_chunk(
 #             print(c["chunk_index"], "|", c["chunk_text"][:200], "...")
 
 # --------------------------------------------------
-# # Quick Test 02
+# Quick Test 02
 # if __name__ == "__main__":
 #     from sentence_transformers import SentenceTransformer
 #     from sklearn.metrics.pairwise import cosine_similarity
@@ -92,3 +87,26 @@ def semantic_chunk(
 #     print("Similarity between 0 and 2:", sim_0_2) # 0.005693812
 
 #     # If delete [0][0] -> [[0.9046357]] 1x1
+
+# --------------------------------------------------
+# Quick Test 03
+if __name__ == "__main__":
+    DATA_FOLDER = "./data/" 
+    if os.path.exists(DATA_FOLDER):
+        for fname in os.listdir(DATA_FOLDER):
+            path = os.path.join(DATA_FOLDER, fname)
+            if not os.path.isfile(path):
+                continue
+            try:
+                from file_loader import read_file 
+                text = read_file(path)
+                if not text:
+                    continue
+                chunks = semantic_chunk(text, similarity_threshold=0.7)
+                print(f"\n=== File: {fname} | {len(chunks)} chunks ===")
+                for c in chunks:
+                    print(f"[chunk {c['chunk_index']}] {c['chunk_text'][:200]}...")
+            except Exception as e:
+                print(f"Error reading {fname}: {e}")
+    else:
+        print("Data folder not found:", DATA_FOLDER)

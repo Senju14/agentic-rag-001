@@ -23,10 +23,10 @@ def embed_chunks(chunks):
 
 # Quick Test
 
-# if __name__ == "__main__":
-#     print("Single:", len(embed_text("hello world")))
-#     print("List:", [len(vector) for vector in embed_text(["hello", "world"])])
-#     chunks = ["Deep learning is powerful.", "Football is popular worldwide."]
-#     out = embed_chunks(chunks)
-#     for result in out:
-#         print(result["chunk_index"], len(result["embedding"]), result["chunk_text"])
+if __name__ == "__main__":
+    print("Single:", len(embed_text("hello world")))
+    print("List:", [len(vector) for vector in embed_text(["hello", "world"])])
+    chunks = ["Deep learning is powerful.", "Football is popular worldwide."]
+    out = embed_chunks(chunks)
+    for result in out:
+        print(result["chunk_index"], len(result["embedding"]), result["chunk_text"])

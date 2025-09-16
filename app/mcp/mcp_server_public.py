@@ -2,12 +2,12 @@ import os
 from typing import Dict, List
 from fastmcp import FastMCP
 from tavily import TavilyClient
-from dotenv import load_dotenv
 import sympy
 import random
 import string
-
+from dotenv import load_dotenv
 load_dotenv()
+
 
 # Load API Key
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")

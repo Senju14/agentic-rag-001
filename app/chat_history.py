@@ -47,9 +47,9 @@ def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
     answers = []
 
     # 1. Try to retrieve from database (RAG)
-    semantic_hits, keyword_hits, candidates = retrieve_and_rerank(user_input, top_k=1)
-    if candidates and candidates[0]['final_score'] > 0.7:
-        raw_answer = candidates[0]['text']
+    semantic_hits = retrieve_and_rerank(user_input, top_k=1)
+    if semantic_hits and semantic_hits[0]['rerank_score'] > 0.7:
+        raw_answer = semantic_hits[0]['text']
         trace.append({
             "thought": "Found answer in database.",
             "action": "database",
@@ -123,7 +123,7 @@ def reply(session_id, user_input, tools, tool_registry, max_tokens=512):
         return answers, trace
 
     # 3. Fallback: not in DB and no tool
-    raw_answer = "Sorry, I don’t have this information in my knowledge base."
+    raw_answer = "Sorry, I don't have this information in my knowledge base."
     trace.append({
         "thought": "No data in DB and no tool used.",
         "action": None,

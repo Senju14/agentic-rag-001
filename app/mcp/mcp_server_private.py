@@ -1,11 +1,12 @@
 import os
 from typing import Dict, List
 from fastmcp import FastMCP
-from dotenv import load_dotenv
 from app.search import retrieve_and_rerank
 from app.function_calling.tool_registry import send_mail_tool
-
+from dotenv import load_dotenv
 load_dotenv()
+
+
 mcp = FastMCP("MCP Server Private")
 
 # --- Tool: search in database ---
@@ -15,8 +16,8 @@ def search_in_database(query: str, top_k: int = 5) -> List[Dict]:
     Search for text in the database (hybrid + rerank).
     """
     try:
-        semantic_hits, keyword_hits, candidates = retrieve_and_rerank(query, top_k=top_k)
-        return candidates
+        semantic_hits = retrieve_and_rerank(query, top_k=top_k)
+        return semantic_hits
     except Exception as e:
         return [{"error": str(e)}]
 
