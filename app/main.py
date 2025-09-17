@@ -86,11 +86,12 @@ def search(req: SearchResult):
 
  
 # -------------------------
-@app.post("/chat")
+@app.post("/chat-function-calling")
 def chat(req: ConversationRequest):
     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
-    answer, trace = reply(session_id, req.user_input, custom_functions, tool_registry)
-    
+    #answer, trace = reply(session_id, req.user_input, custom_functions, tool_registry)
+    answer, trace = reply(session_id, req.user_input, tool_registry)
+
     selected_tool = None
     for step in trace:
         if step.get("action"):  

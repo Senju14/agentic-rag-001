@@ -18,14 +18,16 @@
 # Function Calling
 # ==========================
 
-1. What is the weather like in Singapore?                       ( Weather )
+1. What is the weather in Singapore?                           ( Weather )
+ 
+2. Search LangChain vs LangGraph                                ( Tavily )
 
-2. What event is happening at Apple today?                      ( Tavily )
-
-3. Send an email to nng.ai.intern01@gmail.com with subject 
-'Meeting Reminder' and body 'Don't forget our meeting at 3pm.'  ( Gmail )
+3. Send an email to nng.ai.intern01@gmail.com                   ( Gmail )
 
 4. Translate this to French: How are you today?                 ( Translate )
+
+                                                                ( Retrieve in Database )
+5. Search in database about What is the vision of Greenfield Architects & Planners? 
 
 # ==========================
 # Model Context Protocol

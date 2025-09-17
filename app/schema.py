@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Any, Dict, List, Optional
 
 class SearchResult(BaseModel):
     question: str

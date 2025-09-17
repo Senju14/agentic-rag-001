@@ -4,6 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from langdetect import detect
+from search import retrieve_and_rerank
 
 # ---------------- WEATHER ----------------
 def weather_tool(city: str, format: str = None):
@@ -86,12 +87,36 @@ def translate_tool(text: str, target_lang: str = "en", source_lang: str = None):
         return f"Translation error: {str(e)}"
 
 
+# ---------------- DATABASE SEARCH ----------------
+def search_db_tool(query: str, top_k: int = 5):
+    try:
+        results = retrieve_and_rerank(query, top_k=top_k)
+        if not results:
+            return "No matching results found in database."
+        
+        formatted = []
+        for hit in results:
+            text = hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
+            semantic_score = hit.get("semantic_score", 0.0)
+            rerank_score = hit.get("rerank_score", 0.0)
+            formatted.append({
+                "text": text,
+                "semantic_score": semantic_score,
+                "rerank_score": rerank_score
+            })
+
+        return "\n".join(formatted)
+    except Exception as e:
+        return f"Database search error: {str(e)}"
+
+
 # ---------------- TOOL REGISTRY ----------------
 tool_registry = {
     "weather": weather_tool,
     "web_search": web_search_tool,
     "send_mail": send_mail_tool,
     "translate": translate_tool,
+    "search_db": search_db_tool,
 }
 
 custom_functions = [
@@ -115,7 +140,7 @@ custom_functions = [
             "name": "web_search",
             "description": "Search the web using Tavily API and return the first result.",
             "parameters": {
-                "type": "object",
+                "type": "object", 
                 "properties": {
                     "query": {"type": "string", "description": "Search query"}
                 },
@@ -151,6 +176,21 @@ custom_functions = [
                     "target_lang": {"type": "string", "description": "Target language code (e.g. en, vi, fr, zh, ru, ja, ko)"}
                 },
                 "required": ["text", "target_lang"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_db",
+            "description": "Search the database using semantic search and cross-encoder rerank.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"}, 
+                    "top_k": {"type": "integer", "description": "Number of results to return"}
+                },
+                "required": ["query"]
             }
         }
     },
