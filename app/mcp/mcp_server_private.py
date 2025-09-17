@@ -1,3 +1,4 @@
+# app/mcp/mcp_server_private.py
 import os
 from typing import Dict, List
 from fastmcp import FastMCP
@@ -13,7 +14,7 @@ mcp = FastMCP("MCP Server Private")
 @mcp.tool(annotations={"title": "Search in Database"})
 def search_in_database(query: str, top_k: int = 5) -> List[Dict]:
     """
-    Search for text in the database (hybrid + rerank).
+    Search for text in the database (semantic search + cross-encoder rerank).
     """
     try:
         semantic_hits = retrieve_and_rerank(query, top_k=top_k)

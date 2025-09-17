@@ -3,9 +3,6 @@ from typing import List, Dict
 from groq import Groq
 from dotenv import load_dotenv
 from function_calling.tool_registry import tool_registry
-from search import retrieve_and_rerank
-import json
-import re
 import uuid
   
 # -------------------------
