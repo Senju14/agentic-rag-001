@@ -27,7 +27,7 @@ def clear_pinecone():
 
 # -------------------------
 if __name__ == "__main__":
-    confirm = input("Are you sure you want to DELETE ALL data in Postgres and Pinecone? (yes/no): ")
+    confirm = input("Are you sure you want to DELETE ALL data in Pinecone? (yes/no): ")
     if confirm.lower() == "no":
         print("Aborted.")
     else:

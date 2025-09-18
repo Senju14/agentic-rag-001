@@ -17,7 +17,6 @@ async def main():
     async with client:
         print("[Public] Server reachable!\n", await client.ping())
         print("[Public] Tools:", await client.list_tools())
-
         print("\n[Public] Available resources:", await client.list_resources())
         print("\n[Public] Available prompts:", await client.list_prompts())
 
@@ -44,9 +43,8 @@ async def main():
     async with client_p:
         print("[Private] Server reachable!\n", await client_p.ping())
         print("[Private] Tools:", await client_p.list_tools())
-        # Test search_in_database
+
         print(await client_p.call_tool("search_in_database", {"query": "law", "top_k": 3}))
-        # Test send_mail
         print(await client_p.call_tool("send_mail", {"to_email": "nng.ai.intern01@gmail.com", "subject": "Test MCP", "body": "Hello from MCP private!"}))
 
 # python -m app.mcp.mcp_client

@@ -2,15 +2,18 @@ import os
 from typing import List, Dict
 from groq import Groq
 from dotenv import load_dotenv
-from function_calling.tool_registry import tool_registry
+from function_calling.tool_registry import tool_registry, custom_functions
 import uuid
+import json
   
+
 # -------------------------
 # Load config
 load_dotenv()
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY)
+
 
 # -------------------------
 # In-memory chat store
@@ -33,10 +36,10 @@ def add_message(session_id: str, role: str, content: str):
     chat_store.setdefault(session_id, []).append({"role": role, "content": content})
 
 def check_or_create_session_id(session_id: str = None) -> str:
-    # If not transmitted or transmitted as 'string' (default Swagger), then create new.
-    if session_id and isinstance(session_id, str) and session_id != 'string':
+    if session_id and isinstance(session_id, str):
         return session_id
     return uuid.uuid4().hex
+
 
 # -------------------------
 def reply(session_id: str, user_input: str, tool_registry: dict, max_tokens: int = 128):
@@ -133,10 +136,90 @@ def reply(session_id: str, user_input: str, tool_registry: dict, max_tokens: int
 # if __name__ == "__main__":
 #     sid = "demo-123"
 
-#     print("User: What is deep learning?")
-#     print("Bot:", generate_reply(sid, "What is deep learning?"))
+#     ans1, trace1 = reply(sid, "When was GreenGrow Innovations founded?")
+#     print("Answer 1:", ans1)
+#     print("Trace 1:", trace1)
 
-#     print("\nUser: Explain it simply like I'm 10 years old.")
-#     print("Bot:", generate_reply(sid, "Explain it simply like I'm 10 years old."))
+#     ans2, trace2 = reply(sid, "Where is it headquartered?")
+#     print("Answer 2:", ans2)
+#     print("Trace 2:", trace2)
 
 #     print("\nHistory:", get_history(sid))
+    
+
+
+
+
+import re
+from typing import List, Dict, Any
+
+def router_and_planner(query: str) -> Dict[str, Any]:
+    plan = {"query": query, "steps": []}
+
+    # Rule-based intent detection
+    q_lower = query.lower()
+
+    # 1. Knowledge Q&A (RAG)
+    if "founded" in q_lower or "headquartered" in q_lower or "banh mi" in q_lower:
+        plan["steps"].append({
+            "intent": "knowledge_lookup",
+            "action": "use RAG",
+            "query": query
+        })
+
+    # 2. Weather API
+    if "weather" in q_lower:
+        # try to resolve location
+        if "banh mi" in q_lower:
+            location = "Vietnam"
+        elif "headquartered" in q_lower:
+            location = "Company HQ (from previous step)"
+        else:
+            location = "User location (unspecified)"
+        plan["steps"].append({
+            "intent": "get_weather",
+            "action": "use Weather API",
+            "location": location
+        })
+
+    # 3. Memory / context recall
+    if "first question" in q_lower:
+        plan["steps"].append({
+            "intent": "memory_recall",
+            "action": "lookup conversation history",
+            "detail": "Retrieve the first user question"
+        })
+
+    # 4. Math calculation
+    match = re.findall(r"(\d+)\s*[\+\-\*\/]\s*(\d+)", q_lower)
+    if match:
+        expr = match[0][0] + " + " + match[0][1]  # simple case only for "+"
+        result = eval(expr)
+        plan["steps"].append({
+            "intent": "math",
+            "action": "calculate",
+            "expression": expr,
+            "result": result
+        })
+
+    # Final answer synthesis
+    plan["steps"].append({
+        "intent": "synthesize",
+        "action": "combine results into final answer"
+    })
+
+    return plan
+
+
+# Demo với 5 câu
+queries = [
+    "When was GreenGrow Innovations founded?",
+    "Where it is headquartered? and what is the weather there",
+    "what is the first question that I asking you",
+    "can you calculate 12 + 12 and what is the weather right now.",
+    "do you know Banh Mi, where it come from and what is the weather there",
+]
+
+for q in queries:
+    print(router_and_planner(q))
+    print("-" * 80)

@@ -1,6 +1,6 @@
 from sentence_transformers import CrossEncoder
-from app.embeddings import embed_text
-from app.pineconedb import query_vector  
+from embeddings import embed_text
+from pineconedb import query_vector  
 
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 
@@ -31,9 +31,9 @@ def retrieve_and_rerank(query: str, top_k: int = 5):
     return semantic_hits
 
 
-# ------------------------- Test
+# ------------------------- 
 if __name__ == "__main__":
-    query = "What services does Smith & Johnson Law Firm provide?"
+    query = "Where it is headquartered?"
     hits = retrieve_and_rerank(query, top_k=5)
 
     print("=== Semantic + Rerank Search Results ===")

@@ -4,7 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from langdetect import detect
-from app.search import retrieve_and_rerank
+from search import retrieve_and_rerank
 
 # ---------------- WEATHER ----------------
 def weather_tool(city: str, format: str = None):
@@ -99,15 +99,16 @@ def search_db_tool(query: str, top_k: int = 5):
             text = hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
             semantic_score = hit.get("semantic_score", 0.0)
             rerank_score = hit.get("rerank_score", 0.0)
-            formatted.append({
-                "text": text,
-                "semantic_score": semantic_score,
-                "rerank_score": rerank_score
-            })
 
-        return "\n".join(formatted)
+            # format thành string cho dễ đọc
+            formatted.append(
+                f"- Text: {text}\n  Semantic score: {semantic_score:.4f}\n  Rerank score: {rerank_score:.4f}"
+            )
+
+        return "\n\n".join(formatted)
     except Exception as e:
         return f"Database search error: {str(e)}"
+
 
 
 # ---------------- TOOL REGISTRY ----------------
@@ -195,3 +196,22 @@ custom_functions = [
         }
     },
 ]
+
+
+# python -m app.function_calling.tool_registry
+
+# ---------------- TEST TOOLS ----------------
+if __name__ == "__main__":
+    print(tool_registry["weather"]("Ho Chi Minh"))
+
+    print(tool_registry["web_search"]("Who is Messi?"))
+
+    print(tool_registry["translate"]("Xin chào, tôi tên là Tom", target_lang="fr"))
+
+    # print(tool_registry["send_mail"](
+    #     to_email="nng.ai.intern01@gmail.com",
+    #     subject="Test Email",
+    #     body="Hello, this is a test email from the tool."
+    # ))
+
+    print(tool_registry["search_db"]("When was GreenGrow Innovations founded?", top_k=5))

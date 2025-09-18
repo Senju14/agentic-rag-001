@@ -80,7 +80,7 @@ def explore_topic_prompt(topic: str) -> str:
         f"2. Summarize the key points from each.\n"
         f"3. Provide an overview combining all insights."
     )
-
+ 
 # python -m app.mcp.mcp_server_public
 
 if __name__ == "__main__":

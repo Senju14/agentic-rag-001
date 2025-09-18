@@ -1,35 +1,21 @@
 # app/main.py
 import os
 import asyncio
-from fastapi import FastAPI, HTTPException
+import uvicorn
 from embeddings import embed_chunks
 from pineconedb import upsert_vectors
 from chunking import semantic_chunk
 from chat_history import get_history, clear_history, reply, check_or_create_session_id
+from search import retrieve_and_rerank
+from file_loader import read_file
 from schema import SearchResult, ConversationRequest
 from function_calling.tool_registry import tool_registry
-from search import retrieve_and_rerank
-import uvicorn
-from file_loader import read_file
+from fastapi import FastAPI, HTTPException
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from dotenv import load_dotenv
 load_dotenv()
 
-
-# # --- MCP Setup ---
-MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
-MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
-public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
-private_client = Client(StreamableHttpTransport(url=MCP_PRIVATE_URL))
- 
-async def call_mcp_tool(client: Client, tool_name: str, params: dict):
-    async with client:
-        return await client.call_tool(tool_name, params)
-
-async def list_mcp_tools(client: Client):
-    async with client:
-        return await client.list_tools()
 
 
 # -------------------------
@@ -84,10 +70,10 @@ def search(req: SearchResult):
         "results": semantic_hits
     }
 
- 
+
 # -------------------------
 @app.post("/chat-function-calling")
-def chat(req: ConversationRequest):
+def chat_function_calling(req: ConversationRequest):
     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
     answer, trace = reply(session_id, req.user_input, tool_registry)
 
@@ -106,6 +92,40 @@ def chat(req: ConversationRequest):
     }
 
 
+# -------------------------
+# # --- MCP Setup ---
+# MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
+# MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
+# public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
+# private_client = Client(StreamableHttpTransport(url=MCP_PRIVATE_URL))
+ 
+# async def call_mcp_tool(client: Client, tool_name: str, params: dict):
+#     async with client:
+#         return await client.call_tool(tool_name, params)
+
+# async def list_mcp_tools(client: Client):
+#     async with client:
+#         return await client.list_tools()
+
+
+# # -------------------------
+# @app.post("/chat-mcp")
+# async def chat_mcp(req: ConversationRequest):
+#     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
+#     public_tools = await list_mcp_tools(public_client)
+#     private_tools = await list_mcp_tools(private_client)
+
+    
+
+#     return {
+#         "session_id": session_id,
+#         "history": get_history(session_id),
+#         "public_tools": public_tools,
+#         "private_tools": private_tools
+#     }
+
+
+# -------------------------
 @app.delete("/chat/{session_id}")
 def clear_chat(session_id: str):
     clear_history(session_id)
@@ -113,10 +133,6 @@ def clear_chat(session_id: str):
         "status": "cleared", 
         "session_id": session_id
     }
-
-
-# -------------------------
-
 
 
 # -------------------------
