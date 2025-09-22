@@ -12,7 +12,7 @@ nltk
 hf_xet
 groq
 python-docx
-pypdf
+pdfplumber
 langdetect
 fastmcp
 sympy

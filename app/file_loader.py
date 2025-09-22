@@ -1,7 +1,7 @@
 import os
 from fastapi import HTTPException
-from pypdf import PdfReader
 from docx import Document
+import pdfplumber 
 
 def read_file(path: str) -> str:
     file = os.path.splitext(path)[1].lower()        # Get file extension (e.g. .txt, .pdf, .docx)
@@ -9,12 +9,10 @@ def read_file(path: str) -> str:
         with open(path, "r", encoding="utf-8") as file:
             return file.read()
     elif file == ".pdf":
-        reader = PdfReader(path)
         texts = []
-        for page in reader.pages:
-            raw = page.extract_text() or ""
-            cleaned = raw.replace("\n", " ").replace("  ", " ")
-            texts.append(cleaned)
+        with pdfplumber.open(path) as pdf:
+            for page in pdf.pages:
+                texts.append(page.extract_text() or "")
         return "\n".join(texts)
     elif file == ".docx":
         doc = Document(path)

@@ -87,7 +87,7 @@ def planner(user_input: str, session_id: str) -> Dict:
         temperature=0
     )
     raw = resp.choices[0].message.content.strip()
-
+ 
     try:
         plan = json.loads(raw)
     except Exception:

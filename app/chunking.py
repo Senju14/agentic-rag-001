@@ -85,7 +85,6 @@ def load_pdf_text(pdf_path: str) -> str:
 #     # Calculate similarity between sentence 0 and 2
 #     sim_0_2 = cosine_similarity([embeddings[0]], [embeddings[2]])[0][0]
 #     print("Similarity between 0 and 2:", sim_0_2) # 0.005693812
-
 #     # If delete [0][0] -> [[0.9046357]] 1x1
 
 # --------------------------------------------------
