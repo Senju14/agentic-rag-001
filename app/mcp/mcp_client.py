@@ -10,6 +10,8 @@ load_dotenv()
 PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")
 PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")
 
+
+
 async def main():
     # Test with public server
     transport = StreamableHttpTransport(url=PUBLIC_URL)

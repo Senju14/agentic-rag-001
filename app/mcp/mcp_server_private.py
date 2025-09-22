@@ -14,7 +14,10 @@ mcp = FastMCP("MCP Server Private")
 @mcp.tool(annotations={"title": "Search in Database"})
 def search_in_database(query: str, top_k: int = 5) -> List[Dict]:
     """
-    Search for text in the database (semantic search + cross-encoder rerank).
+    Use this tool when the user asks about companies, documents, 
+    (e.g. GreenGrow Innovations, GreenFields BioTech, QuantumNext Systems, etc.)
+    or information that may exist inside the internal database (docx, pdf). 
+    It performs semantic search on the internal company dataset and reranks with a cross-encoder.
     """
     try:
         semantic_hits = retrieve_and_rerank(query, top_k=top_k)

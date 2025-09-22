@@ -69,9 +69,9 @@ def search(req: SearchResult):
         "query": req.question,
         "results": semantic_hits
     }
- 
+  
 
-# ---  ----------------------
+# -------------------------
 @app.post("/chat-function-calling")
 def chat_function_calling(req: ConversationRequest):
     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
@@ -91,9 +91,9 @@ def chat_function_calling(req: ConversationRequest):
         "selected_tool": selected_tool
     }
 
-
+ 
 # -------------------------
-# # --- MCP Setup ---
+# --- MCP Setup ---
 # MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
 # MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
 # public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
@@ -115,7 +115,6 @@ def chat_function_calling(req: ConversationRequest):
 #     public_tools = await list_mcp_tools(public_client)
 #     private_tools = await list_mcp_tools(private_client)
 
-    
 
 #     return {
 #         "session_id": session_id,

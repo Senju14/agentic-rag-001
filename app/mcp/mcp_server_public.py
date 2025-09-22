@@ -30,7 +30,9 @@ def tech_trends() -> List[str]:
 @mcp.tool(annotations={"title": "Search Topic"})
 def search_topic(query: str, max_results: int = 3) -> List[Dict]:
     """
-    Search for latest information on a topic using Tavily.
+    Use this tool when the user asks about general knowledge, news, current events, 
+    or real-time information (e.g., today's weather, recent updates). 
+    It searches the web using the Tavily API and returns results from the internet.
     """
     try:
         resp = tavily.search(query=query, max_results=max_results)

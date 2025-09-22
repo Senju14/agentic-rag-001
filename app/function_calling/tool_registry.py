@@ -1,11 +1,15 @@
+# app/function_calling/tool_registry.py
 import requests
 import os
 import smtplib
+import sympy as sp
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from langdetect import detect
 from search import retrieve_and_rerank
-
+from dotenv import load_dotenv
+load_dotenv()
+ 
 # ---------------- WEATHER ----------------
 def weather_tool(city: str, format: str = None):
     url = f"https://wttr.in/{city}?format=3"
@@ -100,7 +104,7 @@ def search_db_tool(query: str, top_k: int = 5):
             semantic_score = hit.get("semantic_score", 0.0)
             rerank_score = hit.get("rerank_score", 0.0)
 
-            # format thành string cho dễ đọc
+            # format to string for easy reading
             formatted.append(
                 f"- Text: {text}\n  Semantic score: {semantic_score:.4f}\n  Rerank score: {rerank_score:.4f}"
             )
@@ -110,6 +114,25 @@ def search_db_tool(query: str, top_k: int = 5):
         return f"Database search error: {str(e)}"
 
 
+# ---------------- CALCULATOR ----------------
+def calculator_tool(action_input):
+    """
+    Evaluate a mathematical expression safely using sympy.
+    Supports arithmetic, algebra, calculus, etc.
+    Handles both dict ({"expression": "2+2"}) and raw strings ("2+2").
+    """
+    try:
+        # If input is dict, get the key "expression"
+        if isinstance(action_input, dict) and "expression" in action_input:
+            expression = action_input["expression"]
+        else:
+            expression = str(action_input)
+
+        expr = sp.sympify(expression)   # parse to sympy expression
+        result = expr.evalf()           # calculate
+        return str(result)
+    except Exception as e:
+        return f"Calculator error: {str(e)}"
 
 # ---------------- TOOL REGISTRY ----------------
 tool_registry = {
@@ -118,6 +141,7 @@ tool_registry = {
     "send_mail": send_mail_tool,
     "translate": translate_tool,
     "search_db": search_db_tool,
+    "calculator": calculator_tool,
 }
 
 custom_functions = [
@@ -139,7 +163,9 @@ custom_functions = [
         "type": "function",
         "function": {
             "name": "web_search",
-            "description": "Search the web using Tavily API and return the first result.",
+            "description": "Use this tool ONLY when the user asks about general knowledge, news, current events, "
+            "or real-time information (e.g., today's weather, recent updates). "
+            "It searches the web using the Tavily API and returns results from the internet.",
             "parameters": {
                 "type": "object", 
                 "properties": {
@@ -184,7 +210,10 @@ custom_functions = [
         "type": "function",
         "function": {
             "name": "search_db",
-            "description": "Search the database using semantic search and cross-encoder rerank.",
+            "description": "Use this tool when the user asks about companies, documents, "
+            "(e.g. GreenGrow Innovations, GreenFields BioTech, QuantumNext Systems, etc.)"
+            "or information that may exist inside the internal database (docx, pdf). "
+            "It performs semantic search on the internal company dataset and reranks with a cross-encoder.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -195,6 +224,23 @@ custom_functions = [
             }
         }
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculator",
+            "description": "Evaluate mathematical expressions (arithmetic, algebra, calculus) using sympy.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "expression": {
+                        "type": "string",
+                        "description": "Mathematical expression to evaluate, e.g. '2+2', 'sin(pi/2)', 'integrate(x^2, x)'"
+                    }
+                },
+                "required": ["expression"]
+            }
+        }
+    },
 ]
 
 
@@ -202,11 +248,11 @@ custom_functions = [
 
 # ---------------- TEST TOOLS ----------------
 if __name__ == "__main__":
-    print(tool_registry["weather"]("Ho Chi Minh"))
+    # print(tool_registry["weather"]("Ho Chi Minh"))
 
-    print(tool_registry["web_search"]("Who is Messi?"))
+    # print(tool_registry["web_search"]("Who is Messi?"))
 
-    print(tool_registry["translate"]("Xin chào, tôi tên là Tom", target_lang="fr"))
+    # print(tool_registry["translate"]("Xin chào, tôi tên là Tom", target_lang="fr"))
 
     # print(tool_registry["send_mail"](
     #     to_email="nng.ai.intern01@gmail.com",
@@ -214,4 +260,8 @@ if __name__ == "__main__":
     #     body="Hello, this is a test email from the tool."
     # ))
 
-    print(tool_registry["search_db"]("When was GreenGrow Innovations founded?", top_k=5))
+    # print(tool_registry["search_db"]("When was GreenGrow Innovations founded?", top_k=5))
+
+    print(calculator_tool("2+2*5"))               
+    print(calculator_tool({"expression": "10/3"})) 
+    print(calculator_tool("sin(pi/2)"))
