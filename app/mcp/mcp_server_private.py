@@ -24,7 +24,7 @@ def search_in_database(query: str, top_k: int = 5) -> List[Dict]:
         return semantic_hits
     except Exception as e:
         return [{"error": str(e)}]
- 
+  
 # --- Tool: send mail ---
 @mcp.tool(annotations={"title": "Send Mail"})
 def send_mail(to_email: str, subject: str, body: str) -> Dict:

@@ -1,6 +1,6 @@
 from sentence_transformers import CrossEncoder
-from embeddings import embed_text
-from pineconedb import query_vector    
+from app.embeddings import embed_text
+from app.pineconedb import query_vector    
 
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
 

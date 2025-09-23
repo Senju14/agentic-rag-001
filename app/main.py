@@ -38,7 +38,7 @@ def ingest_folder():
         chunks = semantic_chunk(text)
         chunk_texts = [chunk["chunk_text"] for chunk in chunks]
         embeddings = embed_chunks(chunk_texts)
-
+ 
         vectors = []
         for chunk, embedding in zip(chunks, embeddings):
             vectors.append({
@@ -115,6 +115,7 @@ def chat_function_calling(req: ConversationRequest):
 #     public_tools = await list_mcp_tools(public_client)
 #     private_tools = await list_mcp_tools(private_client)
 
+      
 
 #     return {
 #         "session_id": session_id,

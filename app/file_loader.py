@@ -25,5 +25,5 @@ if __name__ == "__main__":
     DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
     for fname in os.listdir(DATA_FOLDER):
         path = os.path.join(DATA_FOLDER, fname)
-        print(read_file(path)[:100])        
+        print(read_file(path)[:1000])        
         print(os.path.splitext(fname)[1])         # Get file extension (e.g. .txt, .pdf, .docx)

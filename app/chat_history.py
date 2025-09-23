@@ -192,7 +192,7 @@ if __name__ == "__main__":
         "Where it is headquartered? and what is the weather there",
         "do you know Banh Mi, where it come from and what is the weather there"
     ]
-
+ 
     for query in queries:
         print("=" * 80)
         print(f"User Input: {query}")
