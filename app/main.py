@@ -2,6 +2,7 @@
 import os
 import asyncio
 import uvicorn
+import json
 from embeddings import embed_chunks
 from pineconedb import upsert_vectors
 from chunking import semantic_chunk
@@ -9,10 +10,10 @@ from chat_history import get_history, clear_history, reply, check_or_create_sess
 from search import retrieve_and_rerank
 from file_loader import read_file
 from schema import SearchResult, ConversationRequest
-from function_calling.tool_registry import tool_registry
 from fastapi import FastAPI, HTTPException
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
+from app.mcp.mcp_client import mcp_reply
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -94,35 +95,36 @@ def chat_function_calling(req: ConversationRequest):
  
 # -------------------------
 # --- MCP Setup ---
-# MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
-# MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
-# public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
-# private_client = Client(StreamableHttpTransport(url=MCP_PRIVATE_URL))
+MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
+MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
+public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
+private_client = Client(StreamableHttpTransport(url=MCP_PRIVATE_URL))
  
-# async def call_mcp_tool(client: Client, tool_name: str, params: dict):
-#     async with client:
-#         return await client.call_tool(tool_name, params)
+async def call_mcp_tool(client: Client, tool_name: str, params: dict):
+    async with client:
+        return await client.call_tool(tool_name, params)
 
-# async def list_mcp_tools(client: Client):
-#     async with client:
-#         return await client.list_tools()
+async def list_mcp_tools(client: Client):
+    async with client:
+        return await client.list_tools()
 
 
-# # -------------------------
-# @app.post("/chat-mcp")
-# async def chat_mcp(req: ConversationRequest):
-#     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
-#     public_tools = await list_mcp_tools(public_client)
-#     private_tools = await list_mcp_tools(private_client)
+# -------------------------
+@app.post("/chat-mcp")
+async def chat_mcp(req: ConversationRequest):
+    session_id = check_or_create_session_id(getattr(req, 'session_id', None))
+    public_tools = await list_mcp_tools(public_client)
+    private_tools = await list_mcp_tools(private_client)
+  
+    reply = await mcp_reply(req.user_input, session_id=session_id)
 
-      
-
-#     return {
-#         "session_id": session_id,
-#         "history": get_history(session_id),
-#         "public_tools": public_tools,
-#         "private_tools": private_tools
-#     }
+    return {
+        "session_id": session_id,
+        "history": get_history(session_id),
+        "public_tools": public_tools,
+        "private_tools": private_tools,
+        "reply": reply
+    }
 
 
 # -------------------------
@@ -137,8 +139,9 @@ def clear_chat(session_id: str):
 
 # -------------------------
 if __name__ == "__main__":
-    # python -m app.mcp.mcp_server_private
     # python -m app.mcp.mcp_server_public
+    # python -m app.mcp.mcp_server_private
     # python -m app.mcp.mcp_client
+    # python -m app.main
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
     
