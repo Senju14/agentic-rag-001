@@ -11,6 +11,7 @@ load_dotenv()
 
 PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")
 PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")
+
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY)
@@ -142,7 +143,7 @@ def rewrite_output(user_input: str, plan: list[dict], exec_results: list[dict], 
 
 
 # ===============================
-async def mcp_reply(user_input: str, session_id: str = "default_session") -> str:
+async def mcp_reply(user_input: str, session_id: str) -> str:
     plan = planner(user_input, session_id)
     exec_results = await executor(plan)
     final_answer = rewrite_output(user_input, plan, exec_results, session_id)
@@ -152,8 +153,6 @@ async def mcp_reply(user_input: str, session_id: str = "default_session") -> str
 # ===============================
 async def main():
     session_id = get_session_id("session_quantum123")
-
-
 
     user_inputs = [
         "Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.",

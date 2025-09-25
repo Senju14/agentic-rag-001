@@ -38,6 +38,6 @@ def send_mail(to_email: str, subject: str, body: str) -> Dict:
         return {"error": str(e)}
 
 # python -m app.mcp.mcp_server_private
-
+ 
 if __name__ == "__main__":
     mcp.run(transport="http", port=9002)

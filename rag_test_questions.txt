@@ -19,7 +19,10 @@ Advance:
 
 - do you know Banh Mi, where it come from and what is the weather there
 
-
+Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.
+Generate a password and what is the weather in Ho Chi Minh City
+Search in database for GreenGrow Innovations company history and Where it is headquartered?
+Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary.
 
 # ==========================
 # Questions in DB (should be answered)

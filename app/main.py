@@ -13,6 +13,7 @@ from app.schema import SearchResult, ConversationRequest
 from fastapi import FastAPI, HTTPException
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
+from app.mcp.mcp_client import mcp_reply, get_history, get_session_id
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -59,7 +60,7 @@ def ingest_folder():
 # -------------------------
 @app.post("/search")
 def search(req: SearchResult):
-    """Hybrid search: semantic + full-text + rrf + rerank"""
+    """Hybrid search: semantic + full-text"""
     semantic_hits = retrieve_and_rerank(
         query=req.question,
         top_k=req.top_k
@@ -91,39 +92,18 @@ def chat_function_calling(req: ConversationRequest):
         "selected_tool": selected_tool
     }
 
- 
+
 # -------------------------
-# --- MCP Setup ---
-# MCP_PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")    
-# MCP_PRIVATE_URL = os.environ.get("MCP_PRIVATE_URL")  
-# public_client = Client(StreamableHttpTransport(url=MCP_PUBLIC_URL))
-# private_client = Client(StreamableHttpTransport(url=MCP_PRIVATE_URL))
- 
-# async def call_mcp_tool(client: Client, tool_name: str, params: dict):
-#     async with client:
-#         return await client.call_tool(tool_name, params)
+@app.post("/chat-mcp")
+async def chat_mcp(req: ConversationRequest):
+    session_id = get_session_id(getattr(req, 'session_id', None))
+    reply = await mcp_reply(req.user_input, session_id=session_id)
 
-# async def list_mcp_tools(client: Client):
-#     async with client:
-#         return await client.list_tools()
-
-
-# # -------------------------
-# @app.post("/chat-mcp")
-# async def chat_mcp(req: ConversationRequest):
-#     session_id = check_or_create_session_id(getattr(req, 'session_id', None))
-#     public_tools = await list_mcp_tools(public_client)
-#     private_tools = await list_mcp_tools(private_client)
-  
-#     reply = await mcp_reply(req.user_input, session_id=session_id)
-
-#     return {
-#         "session_id": session_id,
-#         "history": get_history(session_id),
-#         "public_tools": public_tools,
-#         "private_tools": private_tools,
-#         "reply": reply
-#     }
+    return {
+        "session_id": session_id,
+        "history": get_history(session_id),
+        "reply": reply
+    }
 
 
 # -------------------------
