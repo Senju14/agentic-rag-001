@@ -7,7 +7,6 @@ from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from groq import Groq
 from dotenv import load_dotenv
-
 load_dotenv()
 
 PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")
@@ -39,7 +38,7 @@ def add_message(session_id: str, role: str, content: str):
 
 
 # ===============================
-# Planner
+# Planner action from input user
 # ===============================
 def planner(user_input: str, session_id: str) -> list[dict]:
     history = get_history(session_id)
@@ -71,7 +70,7 @@ def planner(user_input: str, session_id: str) -> list[dict]:
       ...
     ]
     """
-
+ 
     response = groq_client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
@@ -97,7 +96,7 @@ def planner(user_input: str, session_id: str) -> list[dict]:
 
 
 # ===============================
-# Executor
+# Executor from Plan function above
 # ===============================
 async def executor(plan: list[dict]) -> list[dict]:
     results = []
@@ -143,8 +142,6 @@ def rewrite_output(user_input: str, plan: list[dict], exec_results: list[dict], 
 
 
 # ===============================
-# Full pipeline
-# ===============================
 async def mcp_reply(user_input: str, session_id: str = "default_session") -> str:
     plan = planner(user_input, session_id)
     exec_results = await executor(plan)
@@ -152,8 +149,6 @@ async def mcp_reply(user_input: str, session_id: str = "default_session") -> str
     return final_answer
 
 
-# ===============================
-# TEST
 # ===============================
 async def main():
     session_id = get_session_id("session_quantum123")

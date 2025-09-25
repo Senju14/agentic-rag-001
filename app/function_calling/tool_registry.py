@@ -6,7 +6,7 @@ import sympy as sp
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from langdetect import detect
-from search import retrieve_and_rerank
+from app.search import retrieve_and_rerank
 from dotenv import load_dotenv
 load_dotenv()
  

@@ -2,7 +2,7 @@ from typing import List, Dict
 import numpy as np
 from nltk.tokenize import sent_tokenize
 from sklearn.metrics.pairwise import cosine_similarity
-from embeddings import embed_text
+from app.embeddings import embed_text
 from pypdf import PdfReader
 import os
 

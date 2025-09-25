@@ -5,7 +5,7 @@ import json
 from typing import List, Dict
 from dotenv import load_dotenv
 from groq import Groq
-from function_calling.tool_registry import tool_registry, custom_functions
+from app.function_calling.tool_registry import tool_registry, custom_functions
 
 # -------------------------
 # Load config
@@ -78,6 +78,8 @@ def planner(user_input: str, session_id: str) -> Dict:
         tool_registry=tools_list,
         custom_functions=funcs_desc
     )
+
+    # Implicitly contextual query - follow-up queries
     if history_text:
         prompt = f"Conversation so far:\n{history_text}\n\nNow user asks: {user_input}\n\n{prompt}"
 
@@ -151,7 +153,6 @@ def reply(session_id: str, user_input: str):
     """Orchestrates planning + execution + final response with final rewrite by LLM."""
     plan = planner(user_input, session_id)
     results = executor(plan, session_id)
-
     raw_answer = results[max(results.keys())] if results else "I could not find an answer."
 
     rewrite_prompt = f"""
