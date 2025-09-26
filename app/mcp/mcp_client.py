@@ -23,16 +23,13 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 SESSIONS: dict[str, list[dict]] = {}  
 # {session_id: [{"role": "user/assistant", "content": "..."}]}
 
-
 def get_session_id(session_id: str) -> str:
     if session_id and isinstance(session_id, str):
         return session_id
     return uuid.uuid4().hex
 
-
 def get_history(session_id: str) -> list[dict]:
     return SESSIONS.get(session_id, [])
-
 
 def add_message(session_id: str, role: str, content: str):
     SESSIONS.setdefault(session_id, []).append({"role": role, "content": content})
@@ -53,24 +50,32 @@ def planner(user_input: str, session_id: str) -> list[dict]:
     {history_text}
 
     Available tools:
-    - Public: search_topic(query, max_results), math_solver(expression), password_generator(length, use_special)
-    - Private: search_in_database(query, top_k), send_mail(to_email, subject, body)
+    - Public:
+    • search_topic(query, max_results): for open-domain web/news/general knowledge.
+    • math_solver(expression): for math problems.
+    • password_generator(length, use_special): for generating random passwords.
+
+    - Private:
+    • search_in_database(query, top_k): for company-related, product-related, or internal knowledge base queries.
+    • send_mail(to_email, subject, body): for composing or sending emails.
 
     Rules:
+    - If the question is about known entities in the dataset (e.g. companies, founders, products, dates, locations), ALWAYS use `search_in_database`.
+    - If the question is general world knowledge (e.g. "Who is the president of the US"), use `search_topic`.
     - If the task is simple -> return just one step.
     - If the task is complex -> return multiple steps in order.
     - DO NOT call tools yourself.
     - Return ONLY valid JSON with this format:
 
     [
-      {{
+    {{
         "server": "public" or "private",
         "tool": "<tool_name>",
         "args": {{ ... }}
-      }},
-      ...
+    }}
     ]
     """
+
  
     response = groq_client.chat.completions.create(
         model=GROQ_MODEL,
@@ -94,7 +99,7 @@ def planner(user_input: str, session_id: str) -> list[dict]:
     add_message(session_id, "user", user_input)
     add_message(session_id, "assistant", f"Plan: {json.dumps(plan, ensure_ascii=False)}")
     return plan
-
+ 
 
 # ===============================
 # Executor from Plan function above

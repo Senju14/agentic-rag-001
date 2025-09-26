@@ -1,6 +1,7 @@
 # app/function_calling/tool_registry.py
 import requests
 import os
+import json
 import smtplib
 import sympy as sp
 from email.mime.text import MIMEText
@@ -117,22 +118,35 @@ def search_db_tool(query: str, top_k: int = 5):
 # ---------------- CALCULATOR ----------------
 def calculator_tool(action_input):
     """
-    Evaluate a mathematical expression safely using sympy.
-    Supports arithmetic, algebra, calculus, etc.
-    Handles both dict ({"expression": "2+2"}) and raw strings ("2+2").
+    Safe calculator using sympy.
+    Supports input:
+    - {"expression": "2+2"}
+    - '{"expression": "2+2"}'
+    - "2+2"
     """
     try:
-        # If input is dict, get the key "expression"
-        if isinstance(action_input, dict) and "expression" in action_input:
-            expression = action_input["expression"]
+        # If input is JSON string then parse to dict
+        if isinstance(action_input, str):
+            try:
+                action_input = json.loads(action_input)
+            except json.JSONDecodeError:
+                # If cannot parse then consider as raw string
+                expression = action_input
+            else:
+                expression = action_input.get("expression", "")
+        elif isinstance(action_input, dict):
+            expression = action_input.get("expression", "")
         else:
             expression = str(action_input)
+        if not expression:
+            return "Calculator error: no expression provided"
 
         expr = sp.sympify(expression)   # parse to sympy expression
         result = expr.evalf()           # calculate
         return str(result)
     except Exception as e:
         return f"Calculator error: {str(e)}"
+
 
 # ---------------- TOOL REGISTRY ----------------
 tool_registry = {

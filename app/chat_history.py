@@ -153,17 +153,32 @@ def reply(session_id: str, user_input: str):
     """Orchestrates planning + execution + final response with final rewrite by LLM."""
     plan = planner(user_input, session_id)
     results = executor(plan, session_id)
-    raw_answer = results[max(results.keys())] if results else "I could not find an answer."
+
+    combined_results = "\n".join(
+        f"Step {step['step']} ({step['action']}): {results.get(step['step'], 'No result')}"
+        for step in plan.get("steps", [])
+    )
 
     rewrite_prompt = f"""
-    You are a helpful assistant. Rewrite the following answer to be clear,
-    natural, and user-friendly while keeping the meaning.
+    You are a helpful assistant. Summarize the following multi-step results
+    into a clear, concise, natural final answer for the user.  
+
+    Rules:
+    - Cover ALL parts of the user question.
+    - If the action is "retrieve" or "search", KEEP the original output as-is (do not shorten).
+    - If it's a math expression, provide the simplified numeric answer.
+    - If it's about facts (e.g. origin), answer briefly and clearly.
+    - If it's weather, just state the city with its condition/temperature.
+    - The final answer should read like a natural paragraph, not a list of steps.
 
     User question: {user_input}
-    Raw answer: {raw_answer}
 
-    Rewritten answer:
+    Step results:
+    {combined_results}
+
+    Final answer:
     """
+
     rewrite_resp = groq_client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[{"role": "user", "content": rewrite_prompt}],
@@ -180,28 +195,31 @@ def reply(session_id: str, user_input: str):
         }
         for step in plan.get("steps", [])
     ]
-
+    
     add_message(session_id, "assistant", f"Final Answer: {final_answer}")
     return final_answer, trace
+
 
 # -------------------------
 # Main test
 if __name__ == "__main__":
     session_id = check_or_create_session_id("session_demo123")
     queries = [
+        # "Solve this math expression: (5^2 + 3*4)/15.",
         "When was GreenGrow Innovations founded?",
         "Where it is headquartered? and what is the weather there",
-        "do you know Banh Mi, where it come from and what is the weather there"
+        "Do you know Banh Mi, where it come from and what is the weather there and solve this math expression: 5 + (5 * 2) / 10.",
+        "What is the previous question that I asked you, what is the weather in Singapore and solve this math expression: (5^2 + 3*4)/15.",
     ]
  
     for query in queries:
         print("=" * 80)
         print(f"User Input: {query}")
 
-        plan = planner(query, session_id)
-        execute = executor(plan, session_id)
-        print(f"Plan: {plan}")
-        print(f"Executor: {execute}")
+        # plan = planner(query, session_id)
+        # execute = executor(plan, session_id)
+        # print(f"Plan: {plan}")
+        # print(f"Executor: {execute}")
 
         answer, trace = reply(session_id, query)
         print("\n--- Trace ---")
@@ -210,6 +228,6 @@ if __name__ == "__main__":
         print(answer)
         print("=" * 80)
 
-    print("\n=== Full Conversation Context ===")
-    for m in get_history(session_id):
-        print(f"{m['role']}: {m['content']}")
+    # print("\n=== Full Conversation Context ===")
+    # for m in get_history(session_id):
+    #     print(f"{m['role']}: {m['content']}")

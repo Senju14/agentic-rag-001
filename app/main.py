@@ -25,6 +25,12 @@ DATA_FOLDER = os.path.join(os.path.dirname(__file__), "..", "data")
 
 
 # -------------------------
+@app.get("/")
+def read_root():
+    return {"message": "FastAPI server is running! Use /docs để test API."}
+
+
+# -------------------------
 @app.post("/ingest-folder")
 def ingest_folder():
     """Load all files, chunk, embed, store in Pinecone"""

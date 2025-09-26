@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
  
 
-# Load API Key
+# Load API Key 
 TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY")
 tavily = TavilyClient(api_key=TAVILY_API_KEY)
 mcp = FastMCP("TavilyExplorer")
@@ -23,7 +23,7 @@ def tech_trends() -> List[str]:
         "Quantum Computing",
         "Blockchain",
         "5G and IoT",
-        "Cybersecurity"
+        "Cybersecurity",
     ]
 
 # --- Tool: search topic ---

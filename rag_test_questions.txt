@@ -6,23 +6,26 @@
 
 - Where it is headquartered?
 
-
 Advance:
 
 - When was GreenGrow Innovations founded?
 
 - Where it is headquartered? and what is the weather there
 
-- what is the first question that I asked you
+- What is the first question that I asked you
 
-- can you calculate 12 + 12 and what is the weather right now.
+- Can you calculate 12 + 12 and what is the weather right now.
 
-- do you know Banh Mi, where it come from and what is the weather there
+- Do you know Banh Mi, where it come from and what is the weather there.
 
-Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.
-Generate a password and what is the weather in Ho Chi Minh City
-Search in database for GreenGrow Innovations company history and Where it is headquartered?
-Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary.
+# ==========================
+# Questions for MCP endpoint
+# ==========================
+
+1. Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.
+2. Generate a password and what is the weather in Ho Chi Minh City
+3. Search in database for GreenGrow Innovations company history and Where it is headquartered?
+4. Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary.
 
 # ==========================
 # Questions in DB (should be answered)

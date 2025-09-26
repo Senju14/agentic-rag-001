@@ -41,3 +41,4 @@ def send_mail(to_email: str, subject: str, body: str) -> Dict:
  
 if __name__ == "__main__":
     mcp.run(transport="http", port=9002)
+ 
