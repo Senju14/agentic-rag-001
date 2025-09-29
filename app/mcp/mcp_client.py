@@ -34,46 +34,59 @@ def get_history(session_id: str) -> list[dict]:
 def add_message(session_id: str, role: str, content: str):
     SESSIONS.setdefault(session_id, []).append({"role": role, "content": content})
 
+async def list_tools_from_server(url: str, server_name: str) -> str:
+    transport = StreamableHttpTransport(url=url)
+    client = Client(transport)
+    async with client:
+        tools = await client.list_tools()
+        desc_lines = []
+        for tool in tools:
+            name = tool.name
+            desc = tool.description
+            schema = json.dumps(tool.inputSchema, indent=2, ensure_ascii=False)
+            desc_lines.append(f"{name}{schema}: {desc}")
+    return f"{server_name}:\n" + "\n".join(desc_lines)
+
+async def build_prompt_tools() -> str:
+    public_desc = await list_tools_from_server(PUBLIC_URL, "Public")
+    private_desc = await list_tools_from_server(PRIVATE_URL, "Private")
+    return f"Available tools:\n\n{public_desc}\n\n{private_desc}"
 
 # ===============================
 # Planner action from input user
 # ===============================
-def planner(user_input: str, session_id: str) -> list[dict]:
+async def planner(user_input: str, session_id: str) -> list[dict]:
     history = get_history(session_id)
     history_text = "\n".join(f"{m['role']}: {m['content']}" for m in history)
 
+    tools_text = await build_prompt_tools()
+
     system_prompt = f"""
-    You are a task planner. Your job is to break down the user request 
-    into one or more MCP tool calls.
+        You are a task planner. Your job is to break down the user request 
+        into one or more MCP tool calls.
 
-    Conversation so far:
-    {history_text}
+        Conversation so far:
+        {history_text}
 
-    Available tools:
-    - Public:
-    • search_topic(query, max_results): for open-domain web/news/general knowledge.
-    • math_solver(expression): for math problems.
-    • password_generator(length, use_special): for generating random passwords.
+        {tools_text}
 
-    - Private:
-    • search_in_database(query, top_k): for company-related, product-related, or internal knowledge base queries.
-    • send_mail(to_email, subject, body): for composing or sending emails.
+        Rules:
+        - If the question is about dataset/internal (companies, founders, products, dates, locations) → use `search_in_database`.
+        - If it's general/world knowledge → use `search_topic`.
+        - Math → use `math_solver`.
+        - Password → use `password_generator`.
+        - Email → use `send_mail`.
+        - If simple, return one step. If complex, return multiple steps.
+        - DO NOT call tools yourself.
+        - Return ONLY valid JSON:
 
-    Rules:
-    - If the question is about known entities in the dataset (e.g. companies, founders, products, dates, locations), ALWAYS use `search_in_database`.
-    - If the question is general world knowledge (e.g. "Who is the president of the US"), use `search_topic`.
-    - If the task is simple -> return just one step.
-    - If the task is complex -> return multiple steps in order.
-    - DO NOT call tools yourself.
-    - Return ONLY valid JSON with this format:
-
-    [
-    {{
-        "server": "public" or "private",
-        "tool": "<tool_name>",
-        "args": {{ ... }}
-    }}
-    ]
+        [
+        {{
+            "server": "public" or "private",
+            "tool": "<tool_name>",
+            "args": {{ ... }}
+        }}
+        ]
     """
 
  
@@ -149,7 +162,7 @@ def rewrite_output(user_input: str, plan: list[dict], exec_results: list[dict], 
 
 # ===============================
 async def mcp_reply(user_input: str, session_id: str) -> str:
-    plan = planner(user_input, session_id)
+    plan = await planner(user_input, session_id)
     exec_results = await executor(plan)
     final_answer = rewrite_output(user_input, plan, exec_results, session_id)
     return final_answer
@@ -163,7 +176,7 @@ async def main():
         "Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.",
         "Generate a password and what is the weather in Ho Chi Minh City",
         "Search in database for GreenGrow Innovations company history and Where it is headquartered?.",
-        "Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary." 
+        # "Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary." 
     ]
 
 
