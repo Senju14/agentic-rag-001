@@ -91,12 +91,63 @@ class SupervisorAgent:
         )
         return response.choices[0].message.content.strip()
 
+    def classify_intent(self, user_input: str) -> str:
+        """
+        Ask LLM to classify intent of user query.
+        Returns: "history" | "normal"
+        """
+        system_prompt = """
+        You are an intent classifier.
+        Decide if the user query is about:
+        - "history": asking about previous conversation or past questions.
+        - "normal": any other request (math, news, company data, etc.)
+        Return only one word: history or normal.
+        """
+
+        response = groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input},
+            ],
+            temperature=0,
+        )
+
+        return response.choices[0].message.content.strip().lower()
+
 
     async def run(self, user_input: str, session_id: str = None):
         session_id = check_or_create_session_id(session_id)
         add_message(session_id, "user", user_input)
+
+        # --- Intent classification ---
+        intent = self.classify_intent(user_input)
+
+        if intent == "history":
+            history = get_history(session_id)
+            prev_qs = [m["content"] for m in history if m["role"] == "user"]
+
+            system_prompt = """
+            You are a supervisor agent.
+            The user is asking about their chat history.
+            Given the list of their past questions, answer naturally.
+            """
+            history_text = "\n".join([f"{i+1}. {q}" for i, q in enumerate(prev_qs)])
+            
+            response = groq_client.chat.completions.create(
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": f"User asked: {user_input}\n\nHistory:\n{history_text}"},
+                ],
+                temperature=0.3,
+            )
+            user_answer = response.choices[0].message.content.strip()
+            add_message(session_id, "assistant", user_answer)
+            return session_id, user_answer
+        # ----------------------------------------------------
+
         plan = self.plan(user_input)
-        
         print("\n[Supervisor Plan]")
         for i, step in enumerate(plan, 1):
             print(f"  {i}. {step['task']}  →  {step['agent'].title()}Agent")
@@ -117,7 +168,7 @@ class SupervisorAgent:
                 "result": result
             })
 
-        detailed_answer = "\n".join([f"- ({r['agent']}) {r['task']}: {r['result']}" for r in results])
+        # detailed_answer = "\n".join([f"- ({r['agent']}) {r['task']}: {r['result']}" for r in results])
         user_answer = self.rewrite_answer(user_input, results)
         add_message(session_id, "assistant", user_answer)
         return session_id, user_answer
@@ -126,6 +177,7 @@ class SupervisorAgent:
 
 
 # python -m app.multi_ai_agents.supervisor_agent
+
 # Test
 if __name__ == "__main__":
     sup = SupervisorAgent()
@@ -138,11 +190,12 @@ if __name__ == "__main__":
         print("[Answer 1]\n", answer1)
 
         # Call again with the same session_id (keep history)
-        # _, answer2 = await sup.run(
-        #     "Where it is headquartered? and do you know Banh Mi and what is the weather there.", session_id=session_id
-        # )
+        _, answer2 = await sup.run(
+            "What was the previous question I asked you?", 
+            session_id=session_id
+        )
 
-        # print("\n[Answer 2]\n", answer2)
-        # print("\n[Session History]")
-        # print(json.dumps(get_history(session_id), indent=2, ensure_ascii=False))
+        print("\n[Answer 2]\n", answer2)
+        print("\n[Session History]")
+        print(json.dumps(get_history(session_id), indent=2, ensure_ascii=False))
     asyncio.run(test())

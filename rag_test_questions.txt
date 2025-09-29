@@ -33,9 +33,9 @@ Advance:
 
 1. Search the latest news about AI, solve (5+3*5)/2 and search in database for GreenGrow Innovations company history.
 2. What is GreenGrow Innovations founded date?
-3. Tell me about Banh Mi origin and typical fillings.
+3. Tell me about Banh Mi origin and what is the weather there.
 4. Search GreenGrow Innovations company history.
-5. What was the first question I asked you?
+5. What was the previous question I asked you?
 
 
 # ==========================
