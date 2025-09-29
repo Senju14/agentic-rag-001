@@ -14,6 +14,7 @@ from fastapi import FastAPI, HTTPException
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from app.mcp.mcp_client import mcp_reply, get_history, get_session_id
+from app.multi_ai_agents.supervisor_agent import SupervisorAgent
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -113,9 +114,19 @@ async def chat_mcp(req: ConversationRequest):
 
 
 # -------------------------
-# @app.post("/chat-multi-ai")
+sup = SupervisorAgent()
+@app.post("/chat-multi-ai")
+async def chat_multi_ai(req: ConversationRequest):
+    """Multi-Agent Chat endpoint (Supervisor + Public/Private agents)"""
 
+    session_id = check_or_create_session_id(getattr(req, 'session_id', None))
+    session_id, answer = await sup.run(req.user_input, session_id=session_id)
 
+    return {
+        "session_id": session_id,
+        "reply": answer,
+        "history": get_history(session_id)
+    }
 
 # -------------------------
 @app.delete("/chat/{session_id}")

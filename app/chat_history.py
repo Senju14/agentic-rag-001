@@ -13,7 +13,7 @@ load_dotenv()
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY)
-
+ 
 # -------------------------
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
