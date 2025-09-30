@@ -40,5 +40,9 @@ def send_mail(to_email: str, subject: str, body: str) -> Dict:
 # python -m app.mcp.mcp_server_private
  
 if __name__ == "__main__":
-    mcp.run(transport="http", port=9002)
- 
+    import sys
+    try:
+        mcp.run(transport="http", port=9002)
+    except KeyboardInterrupt:
+        print("\n[Server stopped] MCP Private Agent has been shut down cleanly.")
+        sys.exit(0)

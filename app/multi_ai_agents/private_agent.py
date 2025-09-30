@@ -88,9 +88,9 @@ async def test():
         print("\n==============================")
         print(f"[Task] {t}")
         result = await agent.handle_task(t)
-        print(f"[Result] {result}")
-
-
+        print(f"[Result] {result}") 
+ 
+ 
 # python -m app.multi_ai_agents.private_agent
 if __name__ == "__main__":
     asyncio.run(test())

@@ -86,4 +86,9 @@ def explore_topic_prompt(topic: str) -> str:
 # python -m app.mcp.mcp_server_public
 
 if __name__ == "__main__":
-    mcp.run(transport="http", port=9001)
+    import sys
+    try:
+        mcp.run(transport="http", port=9001)
+    except KeyboardInterrupt:
+        print("\n[Server stopped] MCP Public Agent has been shut down cleanly.")
+        sys.exit(0)
