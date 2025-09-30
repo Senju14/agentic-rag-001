@@ -68,14 +68,3 @@ Advance:
 
                                                                 ( Retrieve in Database )
 5. Search in database about What is the vision of Greenfield Architects & Planners? 
-
-# ==========================
-# Model Context Protocol
-# ==========================
-
-1.use_mcp to search AI research topics
-2.use_mcp to solve 2+3*(7-2)
-3.use_mcp to generate a secure password
-4.use_mcp to search in database about What is the vision of Greenfield Architects & Planners?
-5.use_mcp to send mail to nng.ai.intern01@gmail.com with subject Test and body Hello
-
