@@ -56,6 +56,11 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal docu
 │       └── tool_registry.py    		# Agent tool registry
 │
 ├── data/
+│   ├── Company_GreenFields BioTech.docx
+│   ├── Company_QuantumNext Systems.docx
+│   ├── Company_TechWave Innovations.docx
+│   ├── GreenGrow Innovations_Company History.docx
+│   ├── GreenGrow's EcoHarvest System_A Revolution in Farming.pdf
 │   ├── architecture_firm.pdf
 │   ├── consulting_firm.docx
 │   └── law_firm_intro.txt

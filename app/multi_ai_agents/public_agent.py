@@ -25,7 +25,7 @@ class PublicAgent:
         transport = StreamableHttpTransport(url=PUBLIC_URL)
         client = Client(transport)
         async with client:
-            self.tools = await client.list_tools()  # List of Tool objects
+            self.tools = await client.list_tools()  # List of Tools objects
 
     async def handle_task(self, task: str):
         if not self.tools:
