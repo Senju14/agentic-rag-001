@@ -1,8 +1,6 @@
 # app/main.py
 import os
-import asyncio
 import uvicorn
-import json
 from app.embeddings import embed_chunks
 from app.pineconedb import upsert_vectors
 from app.chunking import semantic_chunk
@@ -11,14 +9,12 @@ from app.search import retrieve_and_rerank
 from app.file_loader import read_file
 from app.schema import SearchResult, ConversationRequest
 from fastapi import FastAPI, HTTPException
-from fastmcp import Client
-from fastmcp.client.transports import StreamableHttpTransport
 from app.mcp.mcp_client import mcp_reply, get_history, get_session_id
-from app.multi_ai_agents.supervisor_agent import SupervisorAgent
+from app.multi_ai_agents.supervisor_agent import SupervisorAgent, get_history_agents
 from dotenv import load_dotenv
 load_dotenv()
 
-
+ 
 
 # -------------------------
 app = FastAPI(title="RAG Demo")
@@ -90,7 +86,7 @@ def chat_function_calling(req: ConversationRequest):
         if step.get("action"):  
             selected_tool = step["action"]
             break
-
+ 
     return {
         "session_id": session_id,
         "reply": answer,
@@ -125,7 +121,7 @@ async def chat_multi_ai(req: ConversationRequest):
     return {
         "session_id": session_id,
         "reply": answer,
-        "history": get_history(session_id)
+        "history": get_history_agents(session_id)
     }
 
 # -------------------------

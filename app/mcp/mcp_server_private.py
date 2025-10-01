@@ -1,5 +1,4 @@
 # app/mcp/mcp_server_private.py
-import os
 from typing import Dict, List
 from fastmcp import FastMCP
 from app.search import retrieve_and_rerank

@@ -71,11 +71,6 @@ async def planner(user_input: str, session_id: str) -> list[dict]:
         {tools_text}
 
         Rules:
-        - If the question is about dataset/internal (companies, founders, products, dates, locations) → use `search_in_database`.
-        - If it's general/world knowledge → use `search_topic`.
-        - Math → use `math_solver`.
-        - Password → use `password_generator`.
-        - Email → use `send_mail`.
         - If simple, return one step. If complex, return multiple steps.
         - DO NOT call tools yourself.
         - Return ONLY valid JSON:

@@ -44,30 +44,39 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal docu
 	agentic-rag-001/
 │
 ├── app/
-│   ├── main.py                 		# FastAPI entrypoint (e.g., starts the API server)
+│   ├── main.py                 		# FastAPI entrypoint (starts API server)
 │   ├── schema.py               		# Pydantic models
 │   ├── chunking.py             		# Semantic chunking
-│   ├── embeddings.py           		# Embedding generation (e.g., Model Qwen)
-│   ├── pineconedb.py           		# Pinecone DB         		
-│   ├── search.py               		# Semantic search and rerank model
+│   ├── embeddings.py           		# Embedding generation
+│   ├── pineconedb.py           		# Pinecone DB
+│   ├── search.py               		# Semantic search and rerank
 │   ├── chat_history.py         		# Chat history management
-│   ├── file_loader.py          		# File loading from data
-│   └── function_calling/
-│       └── tool_registry.py    		# Agent tool registry
+│   ├── file_loader.py          		# Load files from data/
+│   ├── function_calling/
+│   │   └── tool_registry.py    		# Agent tool registry
+│   ├── mcp/
+│   │   ├── mcp_client.py       		# MCP client
+│   │   ├── mcp_server_private.py		# Private MCP server
+│   │   └── mcp_server_public.py		# Public MCP server
+│   └── multi_ai_agents/
+│       ├── private_agent.py    		# Private agent
+│       ├── public_agent.py     		# Public agent
+│       └── supervisor_agent.py 		# Supervisor agent
 │
 ├── data/
-│   ├── Company_GreenFields BioTech.docx
-│   ├── Company_QuantumNext Systems.docx
-│   ├── Company_TechWave Innovations.docx
-│   ├── GreenGrow Innovations_Company History.docx
-│   ├── GreenGrow's EcoHarvest System_A Revolution in Farming.pdf
-│   ├── architecture_firm.pdf
-│   ├── consulting_firm.docx
-│   └── law_firm_intro.txt
+│   ├── Company_ GreenFields BioTech.docx
+│   ├── Company_ QuantumNext Systems.docx
+│   ├── Company_ TechWave Innovations.docx
+│   ├── GreenGrow Innovations_ Company History.docx
+│   └── GreenGrow's EcoHarvest System_ A Revolution in Farming.pdf
 │
 ├── utils/
-│   ├── clear_all_data.py       		# clear all data from Pinecone 
-│   └── test.pdf
+│   ├── clear_all_data.py       		# Clear Pinecone data 
+│   ├── test.pdf
+│   └── archive/
+│       ├── architecture_firm.pdf
+│       ├── consulting_firm.docx
+│       └── law_firm_intro.txt
 │
 ├── rag_test_questions.txt
 ├── README.md

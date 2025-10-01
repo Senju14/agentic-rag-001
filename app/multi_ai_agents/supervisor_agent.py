@@ -11,7 +11,6 @@ from app.multi_ai_agents.private_agent import PrivateAgent
 load_dotenv()
 
 
-
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY)
@@ -20,7 +19,7 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
 
-def get_history(session_id: str) -> List[Dict[str, str]]:
+def get_history_agents(session_id: str) -> List[Dict[str, str]]:
     return chat_store.get(session_id, [])
 
 def clear_history(session_id: str):
@@ -124,7 +123,7 @@ class SupervisorAgent:
         intent = self.classify_intent(user_input)
 
         if intent == "history":
-            history = get_history(session_id)
+            history = get_history_agents(session_id)
             prev_qs = [m["content"] for m in history if m["role"] == "user"]
 
             system_prompt = """
@@ -177,7 +176,7 @@ class SupervisorAgent:
 
 
 # python -m app.multi_ai_agents.supervisor_agent
-
+ 
 # Test
 if __name__ == "__main__":
     sup = SupervisorAgent()
@@ -188,14 +187,15 @@ if __name__ == "__main__":
 
         print("\n[Session ID]", session_id)
         print("[Answer 1]\n", answer1)
-
+ 
         # Call again with the same session_id (keep history)
         _, answer2 = await sup.run(
-            "What was the previous question I asked you?", 
+            "What was the previous question that I asked you?", 
             session_id=session_id
         )
 
         print("\n[Answer 2]\n", answer2)
         print("\n[Session History]")
-        print(json.dumps(get_history(session_id), indent=2, ensure_ascii=False))
+        print(json.dumps(get_history_agents(session_id), indent=2, ensure_ascii=False))
     asyncio.run(test())
+    
