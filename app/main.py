@@ -4,7 +4,7 @@ import uvicorn
 from app.embeddings import embed_chunks
 from app.pineconedb import upsert_vectors
 from app.chunking import semantic_chunk
-from app.chat_history import get_history, clear_history, reply, check_or_create_session_id
+from app.chat_history import get_history_tools_calling, clear_history, reply, check_or_create_session_id
 from app.search import retrieve_and_rerank
 from app.file_loader import read_file
 from app.schema import SearchResult, ConversationRequest
@@ -90,7 +90,7 @@ def chat_function_calling(req: ConversationRequest):
         "session_id": session_id,
         "reply": answer,
         "trace": trace,
-        "history": get_history(session_id),
+        "history": get_history_tools_calling(session_id),
         "selected_tool": selected_tool
     }
 

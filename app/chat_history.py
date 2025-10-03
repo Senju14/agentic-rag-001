@@ -18,7 +18,7 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
 
-def get_history(session_id: str) -> List[Dict[str, str]]:
+def get_history_tools_calling(session_id: str) -> List[Dict[str, str]]:
     return chat_store.get(session_id, [])
 
 def clear_history(session_id: str):
@@ -70,7 +70,7 @@ def planner(user_input: str, session_id: str) -> Dict:
     """Generate JSON execution plan based on user input and conversation history."""
     tools_list = ", ".join(tool_registry.keys())
     funcs_desc = json.dumps(custom_functions, indent=2, ensure_ascii=False)
-    history = get_history(session_id)
+    history = get_history_tools_calling(session_id)
     history_text = "\n".join(f"{m['role']}: {m['content']}" for m in history)
 
     prompt = PLANNER_PROMPT.format(
@@ -229,5 +229,5 @@ if __name__ == "__main__":
         print("=" * 80)
 
     # print("\n=== Full Conversation Context ===")
-    # for m in get_history(session_id):
+    # for m in get_history_tools_calling(session_id):
     #     print(f"{m['role']}: {m['content']}")
