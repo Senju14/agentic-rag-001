@@ -13,7 +13,6 @@ from app.mcp.mcp_client import mcp_reply, get_history, get_session_id
 from app.multi_ai_agents.supervisor_agent import SupervisorAgent, get_history_agents
 from dotenv import load_dotenv
 load_dotenv()
-
  
 
 # -------------------------

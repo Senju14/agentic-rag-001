@@ -73,9 +73,8 @@ class PrivateAgent:
         return result
 
 
-# =========================
-# Test section
-# =========================
+
+# Test
 async def test():
     agent = PrivateAgent()
 

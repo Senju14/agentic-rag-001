@@ -73,9 +73,8 @@ class PublicAgent:
         return result
 
 
-# =========================
-# Test section
-# =========================
+
+# Test
 async def test():
     agent = PublicAgent()
 

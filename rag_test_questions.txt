@@ -16,7 +16,7 @@ Advance:
 
 - Can you calculate 12 + 12 and what is the weather right now.
 
-- Do you know Banh Mi, where it come from and what is the weather there.
+- Do you know Banh Mi, where it comes from and what is the weather there.
 
 # ==========================
 # Questions for MCP endpoint
@@ -43,7 +43,7 @@ Advance:
 # ==========================
 
 1. When was Smith & Johnson Law Firm established and where is it located?
-2. What industries does Anderson & Lee Consulting Group serve?
+2. What industries does Anderson & Lee Consulting Group serve? 
 3. What is the vision of Greenfield Architects & Planners?
  
 # ==========================
