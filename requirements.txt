@@ -17,3 +17,10 @@ langdetect
 fastmcp
 sympy
 tavily-python
+langchain
+langchain-core
+langchain-community
+langchain-experimental
+langchain-neo4j
+langchain-groq
+neo4j

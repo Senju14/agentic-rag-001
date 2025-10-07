@@ -43,44 +43,55 @@ A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal docu
 ```
 	agentic-rag-001/
 │
-├── app/
-│   ├── main.py                 		# FastAPI entrypoint (starts API server)
-│   ├── schema.py               		# Pydantic models
-│   ├── chunking.py             		# Semantic chunking
-│   ├── embeddings.py           		# Embedding generation
-│   ├── pineconedb.py           		# Pinecone DB
-│   ├── search.py               		# Semantic search and rerank
-│   ├── chat_history.py         		# Chat history management
-│   ├── file_loader.py          		# Load files from data/
-│   ├── function_calling/
-│   │   └── tool_registry.py    		# Agent tool registry
-│   ├── mcp/
-│   │   ├── mcp_client.py       		# MCP client
-│   │   ├── mcp_server_private.py		# Private MCP server
-│   │   └── mcp_server_public.py		# Public MCP server
-│   └── multi_ai_agents/
-│       ├── private_agent.py    		# Private agent
-│       ├── public_agent.py     		# Public agent
-│       └── supervisor_agent.py 		# Supervisor agent
+├── src/
+│   ├── main.py
+│   ├── agents/
+│   │   ├── mcp_client.py
+│   │   ├── supervisor_agent.py
+│   │   ├── private/
+│   │   │   ├── mcp_server_private.py
+│   │   │   └── private_agent.py
+│   │   └── public/
+│   │       ├── mcp_server_public.py
+│   │       └── public_agent.py
+│   ├── core/
+│   │   ├── conversation_memory.py
+│   │   ├── embedding_generator.py
+│   │   ├── retriever.py
+│   │   └── text_chunker.py
+│   ├── database/
+│   │   ├── knowledge_graph_builder.py
+│   │   ├── pineconedb.py
+│   │   └── schema.py
+│   ├── functions_calling/
+│   │   └── tool_registry.py
+│   ├── prompts/
+│   │   └── conversation_prompts.py
+│   ├── utils/
+│   │   ├── clear_all_data.py
+│   │   ├── file_loader.py
+│   │   ├── test.pdf
+│   │   └── archive_data/
+│   │       ├── architecture_firm.pdf
+│   │       ├── consulting_firm.docx
+│   │       └── law_firm_intro.txt
+│   └── data/
+│       ├── Company_ GreenFields BioTech.docx
+│       ├── Company_ QuantumNext Systems.docx
+│       ├── Company_ TechWave Innovations.docx
+│       ├── GreenGrow Innovations_ Company History.docx
+│       └── GreenGrow's EcoHarvest System_ A Revolution in Farming.pdf
 │
-├── data/
-│   ├── Company_ GreenFields BioTech.docx
-│   ├── Company_ QuantumNext Systems.docx
-│   ├── Company_ TechWave Innovations.docx
-│   ├── GreenGrow Innovations_ Company History.docx
-│   └── GreenGrow's EcoHarvest System_ A Revolution in Farming.pdf
+├── outputs_sample/
+│   ├── response_chatmcp.json
+│   ├── response_multi_ai_agents.json
+│   └── response_tool_callings.json
 │
-├── utils/
-│   ├── clear_all_data.py       		# Clear Pinecone data 
-│   ├── test.pdf
-│   └── archive/
-│       ├── architecture_firm.pdf
-│       ├── consulting_firm.docx
-│       └── law_firm_intro.txt
+├── tests/
+│   └── example_test_questions.txt
 │
-├── rag_test_questions.txt
 ├── README.md
-├── requirements.txt
+└── requirements.txt
 ```
 
 ## Contributing
