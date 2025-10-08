@@ -1,9 +1,20 @@
-# =========================
-# Virtual Environment
-venv/
-.env
-
-# =========================
 # Python
 __pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.env
+.venv/
+.env/
+.envrc
+.DS_Store
 
+# UV / Poetry
+uv.lock.bak
+poetry.lock.bak
+
+# VSCode
+.vscode/
+
+# System
+.idea/
