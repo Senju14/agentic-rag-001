@@ -1,6 +1,6 @@
 # LEARN RAG
 
-A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal document search and Q&A chatbot, leveraging semantic chunking, SBERT embeddings, Pinecone vector DB, and FastAPI.
+A modular Retrieval-Augmented Generation (RAG) pipeline for synthetic legal document search and Q&A chatbot, leveraging semantic chunking, SBERT embeddings, Pinecone vector DB, and FastAPI. 
 
 ## Technologies Used
 

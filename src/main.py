@@ -86,7 +86,7 @@ def search(req: SearchResult):
     semantic_hits = retrieve_and_rerank(
         query=req.question,
         top_k=req.top_k
-    )
+    ) 
 
     return {
         "query": req.question,
