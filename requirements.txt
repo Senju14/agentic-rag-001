@@ -2,25 +2,25 @@ fastapi
 uvicorn
 pydantic
 pinecone
-sentence-transformers
+sentence - transformers
 torch
 numpy
-scikit-learn
+scikit - learn
 requests
-python-dotenv
+python - dotenv
 nltk
 hf_xet
 groq
-python-docx
+python - docx
 pdfplumber
 langdetect
 fastmcp
 sympy
-tavily-python
+tavily - python
 langchain
-langchain-core
-langchain-community
-langchain-experimental
-langchain-neo4j
-langchain-groq
+langchain - core
+langchain - community
+langchain - experimental
+langchain - neo4j
+langchain - groq
 neo4j

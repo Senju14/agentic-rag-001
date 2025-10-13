@@ -6,8 +6,8 @@ from groq import Groq
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 
 
 PRIVATE_URL = os.getenv("MCP_PRIVATE_URL")
@@ -73,7 +73,6 @@ class PrivateAgent:
         return result
 
 
-
 # # Test
 # async def test():
 #     agent = PrivateAgent()
@@ -87,9 +86,9 @@ class PrivateAgent:
 #         print("\n==============================")
 #         print(f"[Task] {t}")
 #         result = await agent.handle_task(t)
-#         print(f"[Result] {result}") 
- 
- 
+#         print(f"[Result] {result}")
+
+
 # # python -m src.agents.private.private_agent
 # if __name__ == "__main__":
 #     asyncio.run(test())

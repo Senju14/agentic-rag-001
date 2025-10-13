@@ -9,8 +9,10 @@ from email.mime.multipart import MIMEMultipart
 from langdetect import detect
 from src.core.retriever import retrieve_and_rerank
 from dotenv import load_dotenv
+
 load_dotenv()
- 
+
+
 # ---------------- WEATHER ----------------
 def weather_tool(city: str, format: str = None):
     url = f"https://wttr.in/{city}?format=3"
@@ -34,7 +36,7 @@ def web_search_tool(query: str):
         response = requests.post(
             "https://api.tavily.com/search",
             headers={"Authorization": f"Bearer {api_key}"},
-            json={"query": query, "search_depth": "basic", "max_results": 1}
+            json={"query": query, "search_depth": "basic", "max_results": 1},
         )
         response.raise_for_status()
         data = response.json()
@@ -78,16 +80,17 @@ def translate_tool(text: str, target_lang: str = "en", source_lang: str = None):
     url = "https://api.mymemory.translated.net/get"
     try:
         if not source_lang:
-            # Detect language 
+            # Detect language
             source_lang = detect(text)
 
         response = requests.get(
-            url,
-            params={"q": text, "langpair": f"{source_lang}|{target_lang}"}
+            url, params={"q": text, "langpair": f"{source_lang}|{target_lang}"}
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("responseData", {}).get("translatedText") or "Translation failed."
+        return (
+            data.get("responseData", {}).get("translatedText") or "Translation failed."
+        )
     except Exception as e:
         return f"Translation error: {str(e)}"
 
@@ -98,7 +101,7 @@ def search_db_tool(query: str, top_k: int = 5):
         results = retrieve_and_rerank(query, top_k=top_k)
         if not results:
             return "No matching results found in database."
-        
+
         formatted = []
         for hit in results:
             text = hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
@@ -141,8 +144,8 @@ def calculator_tool(action_input):
         if not expression:
             return "Calculator error: no expression provided"
 
-        expr = sp.sympify(expression)   # parse to sympy expression
-        result = expr.evalf()           # calculate
+        expr = sp.sympify(expression)  # parse to sympy expression
+        result = expr.evalf()  # calculate
         return str(result)
     except Exception as e:
         return f"Calculator error: {str(e)}"
@@ -166,12 +169,10 @@ custom_functions = [
             "description": "Get current weather for a city using wttr.in",
             "parameters": {
                 "type": "object",
-                "properties": {
-                    "city": {"type": "string", "description": "City name"}
-                },
-                "required": ["city"]
-            }
-        }
+                "properties": {"city": {"type": "string", "description": "City name"}},
+                "required": ["city"],
+            },
+        },
     },
     {
         "type": "function",
@@ -181,13 +182,13 @@ custom_functions = [
             "or real-time information (e.g., today's weather, recent updates). "
             "It searches the web using the Tavily API and returns results from the internet.",
             "parameters": {
-                "type": "object", 
+                "type": "object",
                 "properties": {
                     "query": {"type": "string", "description": "Search query"}
                 },
-                "required": ["query"]
-            }
-        }
+                "required": ["query"],
+            },
+        },
     },
     {
         "type": "function",
@@ -197,13 +198,16 @@ custom_functions = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "to_email": {"type": "string", "description": "Recipient email address"},
+                    "to_email": {
+                        "type": "string",
+                        "description": "Recipient email address",
+                    },
                     "subject": {"type": "string", "description": "Email subject"},
-                    "body": {"type": "string", "description": "Email content"}
+                    "body": {"type": "string", "description": "Email content"},
                 },
-                "required": ["to_email", "subject", "body"]
-            }
-        }
+                "required": ["to_email", "subject", "body"],
+            },
+        },
     },
     {
         "type": "function",
@@ -214,11 +218,14 @@ custom_functions = [
                 "type": "object",
                 "properties": {
                     "text": {"type": "string", "description": "Text to translate"},
-                    "target_lang": {"type": "string", "description": "Target language code (e.g. en, vi, fr, zh, ru, ja, ko)"}
+                    "target_lang": {
+                        "type": "string",
+                        "description": "Target language code (e.g. en, vi, fr, zh, ru, ja, ko)",
+                    },
                 },
-                "required": ["text", "target_lang"]
-            }
-        }
+                "required": ["text", "target_lang"],
+            },
+        },
     },
     {
         "type": "function",
@@ -231,12 +238,15 @@ custom_functions = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "query": {"type": "string", "description": "Search query"}, 
-                    "top_k": {"type": "integer", "description": "Number of results to return"}
+                    "query": {"type": "string", "description": "Search query"},
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Number of results to return",
+                    },
                 },
-                "required": ["query"]
-            }
-        }
+                "required": ["query"],
+            },
+        },
     },
     {
         "type": "function",
@@ -248,15 +258,14 @@ custom_functions = [
                 "properties": {
                     "expression": {
                         "type": "string",
-                        "description": "Mathematical expression to evaluate, e.g. '2+2', 'sin(pi/2)', 'integrate(x^2, x)'"
+                        "description": "Mathematical expression to evaluate, e.g. '2+2', 'sin(pi/2)', 'integrate(x^2, x)'",
                     }
                 },
-                "required": ["expression"]
-            }
-        }
+                "required": ["expression"],
+            },
+        },
     },
 ]
-
 
 
 # python -m src.functions_calling.tool_registry
@@ -277,6 +286,6 @@ if __name__ == "__main__":
 
     # print(tool_registry["search_db"]("When was GreenGrow Innovations founded?", top_k=5))
 
-    print(calculator_tool("2+2*5"))               
-    print(calculator_tool({"expression": "10/3"})) 
+    print(calculator_tool("2+2*5"))
+    print(calculator_tool({"expression": "10/3"}))
     print(calculator_tool("sin(pi/2)"))

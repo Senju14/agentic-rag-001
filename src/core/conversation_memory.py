@@ -6,7 +6,7 @@ from typing import List, Dict
 from dotenv import load_dotenv
 from groq import Groq
 from src.functions_calling.tool_registry import tool_registry, custom_functions
-from src.prompts.conversation_prompts import PLANNER_PROMPT, EXECUTOR_PROMPT    
+from src.prompts.conversation_prompts import PLANNER_PROMPT, EXECUTOR_PROMPT
 
 # -------------------------
 # Load config
@@ -14,19 +14,23 @@ load_dotenv()
 GROQ_MODEL = os.getenv("GROQ_MODEL")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY)
- 
+
 # -------------------------
 # In-memory chat store
 chat_store: Dict[str, List[Dict[str, str]]] = {}
 
+
 def get_history_tools_calling(session_id: str) -> List[Dict[str, str]]:
     return chat_store.get(session_id, [])
+
 
 def clear_history(session_id: str):
     chat_store.pop(session_id, None)
 
+
 def add_message(session_id: str, role: str, content: str):
     chat_store.setdefault(session_id, []).append({"role": role, "content": content})
+
 
 def check_or_create_session_id(session_id: str = None) -> str:
     if session_id and isinstance(session_id, str):
@@ -43,9 +47,7 @@ def planner(user_input: str, session_id: str) -> Dict:
     history_text = "\n".join(f"{m['role']}: {m['content']}" for m in history)
 
     prompt = PLANNER_PROMPT.format(
-        input=user_input,
-        tool_registry=tools_list,
-        custom_functions=funcs_desc
+        input=user_input, tool_registry=tools_list, custom_functions=funcs_desc
     )
 
     # Implicitly contextual query - follow-up queries
@@ -53,21 +55,22 @@ def planner(user_input: str, session_id: str) -> Dict:
         prompt = f"Conversation so far:\n{history_text}\n\nNow user asks: {user_input}\n\n{prompt}"
 
     resp = groq_client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0
+        model=GROQ_MODEL, messages=[{"role": "user", "content": prompt}], temperature=0
     )
     raw = resp.choices[0].message.content.strip()
- 
+
     try:
         plan = json.loads(raw)
     except Exception:
-        raw_json = raw[raw.find("{"): raw.rfind("}") + 1]
+        raw_json = raw[raw.find("{") : raw.rfind("}") + 1]
         plan = json.loads(raw_json)
 
     add_message(session_id, "user", user_input)
-    add_message(session_id, "assistant", f"Plan: {json.dumps(plan, ensure_ascii=False)}")
+    add_message(
+        session_id, "assistant", f"Plan: {json.dumps(plan, ensure_ascii=False)}"
+    )
     return plan
+
 
 # -------------------------
 def executor(plan: Dict, session_id: str) -> Dict[int, str]:
@@ -84,13 +87,13 @@ def executor(plan: Dict, session_id: str) -> Dict[int, str]:
             custom_functions=funcs_desc,
             plan=json.dumps(plan, indent=2, ensure_ascii=False),
             current_step=json.dumps(step, ensure_ascii=False),
-            previous_results=json.dumps(results, indent=2, ensure_ascii=False)
+            previous_results=json.dumps(results, indent=2, ensure_ascii=False),
         )
 
         resp = groq_client.chat.completions.create(
             model=GROQ_MODEL,
             messages=[{"role": "user", "content": reasoning_prompt}],
-            temperature=0
+            temperature=0,
         )
         reasoning = resp.choices[0].message.content.strip()
         print(f"\n[Executor Reasoning for Step {step_no}]\n{reasoning}")
@@ -114,8 +117,11 @@ def executor(plan: Dict, session_id: str) -> Dict[int, str]:
         results[step_no] = output
         print(f"[Step {step_no}] {action}({action_input}) -> {output}")
 
-    add_message(session_id, "assistant", f"Results: {json.dumps(results, ensure_ascii=False)}")
+    add_message(
+        session_id, "assistant", f"Results: {json.dumps(results, ensure_ascii=False)}"
+    )
     return results
+
 
 # -------------------------
 def reply(session_id: str, user_input: str):
@@ -160,11 +166,11 @@ def reply(session_id: str, user_input: str):
             "step": step["step"],
             "action": step["action"],
             "input": step.get("input", ""),
-            "output": results.get(step["step"], None)
+            "output": results.get(step["step"], None),
         }
         for step in plan.get("steps", [])
     ]
-    
+
     add_message(session_id, "assistant", f"Final Answer: {final_answer}")
     return final_answer, trace
 
@@ -181,7 +187,7 @@ if __name__ == "__main__":
         "Do you know Banh Mi, where it come from and what is the weather there and solve this math expression: 5 + (5 * 2) / 10.",
         "What is the previous question that I asked you, what is the weather in Singapore and solve this math expression: (5^2 + 3*4)/15.",
     ]
- 
+
     for query in queries:
         print("=" * 80)
         print(f"User Input: {query}")

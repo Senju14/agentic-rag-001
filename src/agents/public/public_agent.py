@@ -6,8 +6,8 @@ from groq import Groq
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 
 
 PUBLIC_URL = os.getenv("MCP_PUBLIC_URL")
@@ -71,7 +71,6 @@ class PublicAgent:
         async with client:
             result = await client.call_tool(tool_call["tool"], tool_call["args"])
         return result
-
 
 
 # # Test

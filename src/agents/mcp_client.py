@@ -7,6 +7,7 @@ from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from groq import Groq
 from dotenv import load_dotenv
+
 load_dotenv()
 
 PUBLIC_URL = os.environ.get("MCP_PUBLIC_URL")
@@ -20,19 +21,23 @@ groq_client = Groq(api_key=GROQ_API_KEY)
 # In-memory session storage
 # ===============================
 
-SESSIONS: dict[str, list[dict]] = {}  
+SESSIONS: dict[str, list[dict]] = {}
 # {session_id: [{"role": "user/assistant", "content": "..."}]}
+
 
 def get_session_id(session_id: str) -> str:
     if session_id and isinstance(session_id, str):
         return session_id
     return uuid.uuid4().hex
 
+
 def get_history(session_id: str) -> list[dict]:
     return SESSIONS.get(session_id, [])
 
+
 def add_message(session_id: str, role: str, content: str):
     SESSIONS.setdefault(session_id, []).append({"role": role, "content": content})
+
 
 async def list_tools_from_server(url: str, server_name: str) -> str:
     transport = StreamableHttpTransport(url=url)
@@ -47,10 +52,12 @@ async def list_tools_from_server(url: str, server_name: str) -> str:
             desc_lines.append(f"{name}{schema}: {desc}")
     return f"{server_name}:\n" + "\n".join(desc_lines)
 
+
 async def build_prompt_tools() -> str:
     public_desc = await list_tools_from_server(PUBLIC_URL, "Public")
     private_desc = await list_tools_from_server(PRIVATE_URL, "Private")
     return f"Available tools:\n\n{public_desc}\n\n{private_desc}"
+
 
 # ===============================
 # Planner action from input user
@@ -84,7 +91,6 @@ async def planner(user_input: str, session_id: str) -> list[dict]:
         ]
     """
 
- 
     response = groq_client.chat.completions.create(
         model=GROQ_MODEL,
         messages=[
@@ -105,9 +111,11 @@ async def planner(user_input: str, session_id: str) -> list[dict]:
         raise ValueError(f"Failed to parse plan: {e}\nRaw: {raw_plan}")
 
     add_message(session_id, "user", user_input)
-    add_message(session_id, "assistant", f"Plan: {json.dumps(plan, ensure_ascii=False)}")
+    add_message(
+        session_id, "assistant", f"Plan: {json.dumps(plan, ensure_ascii=False)}"
+    )
     return plan
- 
+
 
 # ===============================
 # Executor from Plan function above
@@ -120,17 +128,16 @@ async def executor(plan: list[dict]) -> list[dict]:
         client = Client(transport)
         async with client:
             result = await client.call_tool(step["tool"], step["args"])
-            results.append({
-                "step": step,
-                "result": str(result)
-            })
+            results.append({"step": step, "result": str(result)})
     return results
 
 
 # ===============================
 # Rewriter
 # ===============================
-def rewrite_output(user_input: str, plan: list[dict], exec_results: list[dict], session_id: str) -> str:
+def rewrite_output(
+    user_input: str, plan: list[dict], exec_results: list[dict], session_id: str
+) -> str:
     prompt = f"""
     User asked: {user_input}
 
@@ -171,9 +178,8 @@ async def main():
         "Search for the latest news about quantum computing and Solve this math expression: (5^2 + 3*4) / 2.",
         "Generate a password and what is the weather in Ho Chi Minh City",
         "Search in database for GreenGrow Innovations company history and Where it is headquartered?.",
-        # "Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary." 
+        # "Find recent AI news and then send me an email summary to nng.ai.intern01@gmail.com with a summary."
     ]
-
 
     for user_input in user_inputs:
         print("\n==============================")

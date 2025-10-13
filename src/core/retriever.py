@@ -1,9 +1,10 @@
 # src/core/retriever.py
 from sentence_transformers import CrossEncoder
 from src.core.embedding_generator import embed_text
-from src.database.pineconedb import query_vector    
+from src.database.pineconedb import query_vector
 
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2")
+
 
 def retrieve_and_rerank(query: str, top_k: int = 5):
     """
@@ -20,7 +21,10 @@ def retrieve_and_rerank(query: str, top_k: int = 5):
         hit["semantic_score"] = float(hit.get("score", 0.0))
 
     # Cross-encoder rerank
-    candidate_texts = [hit.get("metadata", {}).get("chunk_text") or hit.get("text", "") for hit in semantic_hits]
+    candidate_texts = [
+        hit.get("metadata", {}).get("chunk_text") or hit.get("text", "")
+        for hit in semantic_hits
+    ]
     rerank_scores = reranker.predict([(query, text) for text in candidate_texts])
 
     # Add rerank_score to each hit
@@ -32,7 +36,7 @@ def retrieve_and_rerank(query: str, top_k: int = 5):
     return semantic_hits
 
 
-# ------------------------- 
+# -------------------------
 # python -m src.core.retriever
 # if __name__ == "__main__":
 #     query = "Where it is headquartered?"

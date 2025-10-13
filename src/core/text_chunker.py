@@ -7,6 +7,7 @@ from src.core.embedding_generator import embed_text
 from pypdf import PdfReader
 import os
 
+
 def semantic_chunk(text: str, similarity_threshold: float = 0.7) -> List[Dict]:
     """
     Semantic chunking: group sentences based on cosine similarity.
@@ -37,13 +38,9 @@ def semantic_chunk(text: str, similarity_threshold: float = 0.7) -> List[Dict]:
                     chunk.append(sentences[j])
                     visited.add(j)
 
-        chunks.append({
-            "chunk_index": idx,
-            "chunk_text": " ".join(chunk)
-        })
+        chunks.append({"chunk_index": idx, "chunk_text": " ".join(chunk)})
         idx += 1
     return chunks
-
 
 
 # python -m src.core.text_chunker
@@ -93,14 +90,14 @@ def semantic_chunk(text: str, similarity_threshold: float = 0.7) -> List[Dict]:
 # --------------------------------------------------
 # Quick Test 03
 # if __name__ == "__main__":
-#     DATA_FOLDER = "src/data/" 
+#     DATA_FOLDER = "src/data/"
 #     if os.path.exists(DATA_FOLDER):
 #         for fname in os.listdir(DATA_FOLDER):
 #             path = os.path.join(DATA_FOLDER, fname)
 #             if not os.path.isfile(path):
 #                 continue
 #             try:
-#                 from src.utils.file_loader import read_file 
+#                 from src.utils.file_loader import read_file
 #                 text = read_file(path)
 #                 if not text:
 #                     continue

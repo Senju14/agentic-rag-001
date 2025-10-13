@@ -18,14 +18,21 @@ if index_name not in pinecone.list_indexes().names():
         spec=ServerlessSpec(cloud="aws", region=region),
     )
     time.sleep(2)
- 
+
 index = pinecone.Index(index_name)
 
+
 def upsert_vectors(vectors):
-    payload = [(vector["id"], vector["embedding"], vector.get("metadata", {})) for vector in vectors]
+    payload = [
+        (vector["id"], vector["embedding"], vector.get("metadata", {}))
+        for vector in vectors
+    ]
     index.upsert(payload)
+
 
 def query_vector(vector, top_k=5):
     result = index.query(vector=vector, top_k=top_k, include_metadata=True)
-    return [{"id": match.id, "score": match.score, "metadata": match.metadata} for match in result.matches]
- 
+    return [
+        {"id": match.id, "score": match.score, "metadata": match.metadata}
+        for match in result.matches
+    ]

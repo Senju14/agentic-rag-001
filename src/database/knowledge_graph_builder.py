@@ -130,8 +130,6 @@ async def build_graph():
     print("\nGraph successfully built and pushed to Neo4j!")
 
 
-
-
 # python -m src.database.knowledge_graph_builder
 # -----------------------------------------------------
 # if __name__ == "__main__":

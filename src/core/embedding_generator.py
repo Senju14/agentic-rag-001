@@ -1,24 +1,26 @@
+# src/core/embedding_generator.py
 from sentence_transformers import SentenceTransformer
 
 # Use this model for 1024 dims
 sbert = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
 
+
 def embed_text(text):
     embeddings = sbert.encode(text)
     return embeddings.tolist()
 
+
 # No tolist() the result will be <ndarray>
-# Pinecone work with <list> 
+# Pinecone work with <list>
+
 
 def embed_chunks(chunks):
     embeddings = sbert.encode(chunks)
     results = []
     for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-        results.append({
-            "chunk_text": chunk,
-            "chunk_index": i,
-            "embedding": embedding.tolist()
-        })
+        results.append(
+            {"chunk_text": chunk, "chunk_index": i, "embedding": embedding.tolist()}
+        )
     return results
 
 
