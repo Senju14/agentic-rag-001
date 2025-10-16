@@ -12,7 +12,7 @@ from src.core.conversation_memory import (
     check_or_create_session_id,
     clear_history,
     get_history_tools_calling,
-    reply,
+    reply, 
 )
 from src.core.embedding_generator import embed_chunks
 from src.core.retriever import retrieve_and_rerank
@@ -27,7 +27,7 @@ load_dotenv()
 
 # -------------------------
 app = FastAPI(title="RAG Demo")
-DATA_FOLDER = "src/data/"
+DATA_FOLDER = "src/data/"   
 
 
 # -------------------------
